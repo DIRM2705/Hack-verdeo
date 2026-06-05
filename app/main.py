@@ -10,6 +10,7 @@ from sqlalchemy import create_engine, select, func
 from sqlalchemy.orm import Session
 from datetime import datetime
 from pathlib import Path
+from uuid import UUID
 import csv
 import random
 import subprocess
@@ -25,35 +26,57 @@ db = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 Base.metadata.create_all(db)
 
 
-
-
 @app.route('/')
 def dashboard():
-    return render_template('index.html')
+    # ejemplo de UUID de empresa — reemplazar por UUID real según sesión/usuario
+    ejemplo_uuid = '85a3839e6ee94d7096867d0f0e26c322'
+    return render_template('index.html', empresa_uuid=ejemplo_uuid)
+
+@app.route('/empleados/<uuid_empresa>')
+def empleados_page(uuid_empresa : str):
+    """Renderiza la plantilla de empleados usando los datos obtenidos desde la BD."""
+    with Session(db) as session:
+        uuid_empresa = UUID(uuid_empresa)
+        stm = select(Empleado.uuid, Empleado.nombres, Empleado.apellidos, Badge.icono_url).join(Badge, Badge.empleados_uuid == Empleado.uuid).where(Empleado.empresa_uuid == uuid_empresa)
+        rows = session.execute(stm).all()
+        empleados_list = []
+        for r in rows:
+            empleados_list.append({
+                'uuid': r[0],
+                'nombres': r[1],
+                'apellidos': r[2],
+                'correo': r[3] if len(r) > 3 else '',
+                'icono_url': r[4] if len(r) > 4 else None,
+                'badges': []
+            })
+    return render_template('empleados.html', empresa_uuid=uuid_empresa, empleados=empleados_list)
 
 @app.route('/api/certificaciones/<uuid_empresa>')
-def certificaciones(uuid_empresa):
+def certificaciones(uuid_empresa : str):
     with Session(db) as session:
-        stm = select(Certificacion.nombre, Certificacion.fecha_vencimiento).where(Certificacion.uuid_empresa == uuid_empresa)
-        certs = session.execute(stm).scalars().all()
+        uuid_empresa = UUID(uuid_empresa)
+        stm = select(Certificacion.nombre, Certificacion.fecha_vencimiento).where(Certificacion.empresa_uuid == uuid_empresa)
+        certs = session.execute(stm).all()
         return jsonify([{
             "count": len(certs),
-            "certificaciones": [{"nombre": c.nombre} for c in certs]
+            "certificaciones": [{"nombre": c.nombre, "fecha_vencimiento": c.fecha_vencimiento} for c in certs]
         }])
         
 @app.route('/api/empleados/<uuid_empresa>')
-def empleados(uuid_empresa):
+def empleados(uuid_empresa : str):
     with Session(db) as session:
-        stm = select(Empleado.uuid, Empleado.nombre, Empleado.apellidos, Badge.icono_url).join(Badge, Empleado.badge_uuid == Badge.uuid).where(Empleado.uuid_empresa == uuid_empresa)
+        uuid_empresa = UUID(uuid_empresa)
+        stm = select(Empleado.uuid, Empleado.nombres, Empleado.apellidos, Badge.icono_url).join(Badge, Badge.empleados_uuid == Empleado.uuid).where(Empleado.empresa_uuid == uuid_empresa)
         emp = session.execute(stm).scalars().all()
         return jsonify([{
             "count": len(emp),
-            "empleados": [{"uuid": e.uuid, "nombre": e.nombre, "apellidos": e.apellidos, "icono_url": e.icono_url} for e in emp]
+            "empleados": [{"uuid": e.uuid, "nombres": e.nombres, "apellidos": e.apellidos, "icono_url": e.icono_url} for e in emp]
         }])
         
 @app.route('/api/reseñas/<uuid_empresa>')
-def reseñas(uuid_empresa):
+def reseñas(uuid_empresa : str):
     with Session(db) as session:
+        uuid_empresa = UUID(uuid_empresa)
         stm = select(func.count(Reseña.uuid)).select_from(Reseña).where(Reseña.uuid_empresa == uuid_empresa)
         res = session.execute(stm).scalar()
         return jsonify([{
@@ -62,22 +85,3 @@ def reseñas(uuid_empresa):
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
-
-
-@app.route('/empleados/<uuid_empresa>')
-def empleados_page(uuid_empresa):
-    """Renderiza la plantilla de empleados usando los datos obtenidos desde la BD."""
-    with Session(db) as session:
-        stm = select(Empleado.uuid, Empleado.nombre, Empleado.apellidos, Empleado.correo, Badge.icono_url).join(Badge, Empleado.badge_uuid == Badge.uuid).where(Empleado.uuid_empresa == uuid_empresa)
-        rows = session.execute(stm).all()
-        empleados_list = []
-        for r in rows:
-            empleados_list.append({
-                'uuid': r[0],
-                'nombre': r[1],
-                'apellido': r[2],
-                'correo': r[3] if len(r) > 3 else '',
-                'icono_url': r[4] if len(r) > 4 else None,
-                'badges': []
-            })
-    return render_template('empleados.html', empleados=empleados_list)
