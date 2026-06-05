@@ -34,10 +34,11 @@ def dashboard():
 @app.route('/api/certificaciones/<uuid_empresa>')
 def certificaciones(uuid_empresa):
     with Session(db) as session:
-        stm = select(func.count(Certificacion.uuid)).select_from(Certificacion).where(Certificacion.uuid_empresa == uuid_empresa)
-        certs = session.execute(stm).scalar()
+        stm = select(Certificacion.nombre, Certificacion.fecha_vencimiento).where(Certificacion.uuid_empresa == uuid_empresa)
+        certs = session.execute(stm).scalars().all()
         return jsonify([{
-            "count": certs
+            "count": len(certs),
+            "certificaciones": [{"nombre": c.nombre} for c in certs]
         }])
         
 @app.route('/api/empleados/<uuid_empresa>')

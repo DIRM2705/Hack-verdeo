@@ -149,3 +149,34 @@ ul { margin-left: 20px; line-height: 1.6; }
 	color: #666;
 	font-weight: bold;
 }
+
+/* Certificaciones list styles */
+.cert-list {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-top: 8px;
+}
+
+.cert-card {
+	padding: 12px;
+	border-radius: 8px;
+	background: rgba(255,255,255,0.9);
+}
+
+.badge-expired {
+	background: #fee2e2;
+	color: #991b1b;
+	padding: 6px 8px;
+	border-radius: 999px;
+	font-weight: 600;
+	display: inline-block;
+}
+
+.badge-unknown {
+	background: #f3f4f6;
+	color: #374151;
+	padding: 6px 8px;
+	border-radius: 999px;
+	display: inline-block;
+}

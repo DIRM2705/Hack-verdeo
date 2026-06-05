@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="empresa-uuid" content="">
     <title>Panel de Administración - Locales</title>
     <link rel="stylesheet" href="../static/main.css">
 </head>
@@ -25,11 +26,11 @@
                     <p><strong>Giro:</strong> Alimentos y Bebidas</p>
                     <br>
                     <h3>Estado de Certificaciones</h3>
-                    <ul>
-                        <li><strong>Certificación actual:</strong> Manejo Higiénico de Alimentos (Distintivo H) - <span style="color: green;">Activa</span></li>
-                        <li><strong>Próxima certificación:</strong> 15 de Octubre, 2026</li>
-                        <li><strong>Historial:</strong> Renovando consecutivamente por 3 años (Desde 2023).</li>
-                    </ul>
+                    <div id="certificaciones-container">
+                        <p id="historial-count">Historial: —</p>
+                        <div id="certificaciones-list" class="cert-list"></div>
+                        <p id="cert-error" class="text-error" style="display:none;color:#b91c1c;margin-top:8px;"></p>
+                    </div>
                 </div>
                 <div class="card">
                     <h3>Opiniones y Calificaciones</h3>
