@@ -29,7 +29,7 @@ Base.metadata.create_all(db)
 @app.route('/')
 def dashboard():
     # ejemplo de UUID de empresa — reemplazar por UUID real según sesión/usuario
-    ejemplo_uuid = '85a3839e6ee94d7096867d0f0e26c322'
+    ejemplo_uuid = 'a0c48199a44a4f22be0c43ade5ddd630'
     return render_template('index.html', empresa_uuid=ejemplo_uuid)
 
 @app.route('/empleados/<uuid_empresa>')
@@ -77,10 +77,11 @@ def empleados(uuid_empresa : str):
 def reseñas(uuid_empresa : str):
     with Session(db) as session:
         uuid_empresa = UUID(uuid_empresa)
-        stm = select(func.count(Reseña.uuid)).select_from(Reseña).where(Reseña.uuid_empresa == uuid_empresa)
-        res = session.execute(stm).scalar()
+        stm = select(Reseña.calificacion, Reseña.comentario).select_from(Reseña).where(Reseña.uuid_empresa == uuid_empresa)
+        res = session.execute(stm).all()
         return jsonify([{
-            "count": res
+            "count": len(res),
+            "reseñas": [{"calificacion": r[0], "comentario": r[1]} for r in res]
         }])
 
 if __name__ == '__main__':
