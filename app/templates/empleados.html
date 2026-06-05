@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Empleados - Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+    * { font-family: 'DM Sans', sans-serif; }
+    code, .mono { font-family: 'DM Mono', monospace; }
+
+    /* Sidebar reutiliza estilos del proyecto */
+    .page-shell { display: flex; min-height: 100vh; background: #f8fafc; }
+    .sidebar {
+      width: 220px; min-height: 100vh; background: #c5b2ad;
+      padding: 2rem 1.25rem; display: flex; flex-direction: column; gap: .5rem;
+      position: sticky; top: 0; flex-shrink: 0;
+    }
+    .sidebar-heading { color: #94a3b8; font-size: .7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .12em; margin-bottom: .5rem; }
+    .nav-link {
+      display: flex; align-items: center; gap: .75rem; padding: .6rem .875rem;
+      border-radius: .5rem; font-size: .875rem; font-weight: 500;
+      color: #94a3b8; text-decoration: none; transition: all .15s;
+    }
+    .nav-link:hover { background: #c5b2ad; color: #e2e8f0; }
+    .nav-link--active { background: #c5b2ad; color: #60a5fa !important; }
+    .nav-link__icon { width: 1rem; text-align: center; }
+    .page-main { flex: 1; padding: 2rem 2.5rem; max-width: 1200px; }
+    .admin-badge {
+      display: flex; align-items: center; gap: .5rem;
+      background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;
+      padding: .375rem .875rem; border-radius: 9999px; font-size: .8rem; font-weight: 600;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15,23,42,.55);
+      backdrop-filter: blur(4px); z-index: 50;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .modal-backdrop.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: #fff; border-radius: 1rem; width: 100%; max-width: 520px;
+      box-shadow: 0 25px 60px rgba(0,0,0,.18); padding: 2rem;
+      transform: translateY(16px) scale(.97); transition: transform .25s;
+    }
+    .modal-backdrop.open .modal { transform: translateY(0) scale(1); }
+
+    /* Badge pill */
+    .badge-pill {
+      display: inline-flex; align-items: center; gap: .35rem;
+      padding: .25rem .65rem; border-radius: 9999px; font-size: .72rem;
+      font-weight: 600; border: 1px solid;
+    }
+    .badge-pill button {
+      line-height: 1; background: none; border: none; cursor: pointer;
+      opacity: .6; transition: opacity .15s;
+    }
+    .badge-pill button:hover { opacity: 1; }
+
+    /* Avatar initials */
+    .avatar {
+      width: 2.25rem; height: 2.25rem; border-radius: 9999px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem; font-weight: 700; flex-shrink: 0;
+    }
+
+    /* Row hover */
+    tr.employee-row { transition: background .1s; }
+    tr.employee-row:hover { background: #f8fafc; }
+
+    /* Animación de entrada de filas */
+    @keyframes fadeSlide {
+      from { opacity:0; transform:translateY(6px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .animate-row { animation: fadeSlide .25s ease both; }
+
+    input:focus, select:focus {
+      outline: none; border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+    }
+  </style>
+</head>
+<body class="bg-slate-50">
+
+<div class="page-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="mb-6">
+      <h2 class="sidebar-heading">Panel</h2>
+    </div>
+    <nav class="flex flex-col gap-1">
+      <a href="#" data-section="resumen" class="nav-link nav-link--default">
+        <i class="fa-solid fa-chart-line nav-link__icon"></i>
+        <span>Resumen</span>
+      </a>
+      <a href="#" data-section="Empleados" class="nav-link nav-link--active">
+        <i class="fa-solid fa-users nav-link__icon"></i>
+        <span>Empleados</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="page-main">
+
+    <!-- Encabezado -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Empleados</h1>
+        <p class="text-slate-500 text-sm mt-1">Registra empleados y gestiona sus badges y certificaciones.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="admin-badge"><i class="fa-solid fa-user"></i> Admin</span>
+        <button onclick="openModal('add')"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
+          <i class="fa-solid fa-plus"></i> Nuevo empleado
+        </button>
+      </div>
+    </div>
+
+    <!-- Buscador + filtro -->
+    <div class="flex flex-col sm:flex-row gap-3 mb-5">
+      <div class="relative flex-1">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+        <input id="search-input" type="text" placeholder="Buscar empleado…"
+          class="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 transition"
+          oninput="filterTable()"/>
+      </div>
+      <select id="dept-filter" onchange="filterTable()"
+        class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 transition">
+        <option value="">Todos los departamentos</option>
+        <option>Ingeniería</option>
+        <option>Diseño</option>
+        <option>Ventas</option>
+        <option>Recursos Humanos</option>
+        <option>Operaciones</option>
+      </select>
+    </div>
+
+    <!-- Tabla de empleados -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wide">
+          <tr>
+            <th class="text-left px-5 py-3 font-semibold">Empleado</th>
+            <th class="text-left px-5 py-3 font-semibold hidden sm:table-cell">Departamento</th>
+            <th class="text-left px-5 py-3 font-semibold hidden md:table-cell">Badges</th>
+            <th class="text-left px-5 py-3 font-semibold">Estatus</th>
+            <th class="px-5 py-3"></th>
+          </tr>
+        </thead>
+        <tbody id="employees-tbody" class="divide-y divide-slate-100"></tbody>
+      </table>
+
+      <!-- Estado vacío -->
+      <div id="empty-state" class="hidden py-16 text-center">
+        <i class="fa-solid fa-user-slash text-3xl text-slate-300 mb-3"></i>
+        <p class="text-slate-400 font-medium">No se encontraron empleados</p>
+        <p class="text-slate-400 text-xs mt-1">Intenta ajustar el filtro o agrega uno nuevo.</p>
+      </div>
+    </div>
+
+    <p id="count-label" class="text-xs text-slate-400 mt-3"></p>
+  </main>
+</div>
+
+<!-- ───────────── MODAL ───────────── -->
+<div id="modal-backdrop" class="modal-backdrop" onclick="closeModalOutside(event)">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+
+    <div class="flex items-center justify-between mb-6">
+      <h2 id="modal-title" class="text-lg font-bold text-slate-900">Nuevo empleado</h2>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition text-xl leading-none">&times;</button>
+    </div>
+
+    <!-- Formulario -->
+    <div class="space-y-4">
+      <input type="hidden" id="edit-index" value=""/>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre *</label>
+          <input id="f-nombre" type="text" placeholder="Juan"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition"/>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Apellido *</label>
+          <input id="f-apellido" type="text" placeholder="García"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition"/>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Correo *</label>
+        <input id="f-correo" type="email" placeholder="juan@empresa.com"
+          class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition"/>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Departamento</label>
+          <select id="f-dept"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition">
+            <option value="">— Seleccionar —</option>
+            <option>Ingeniería</option>
+            <option>Diseño</option>
+            <option>Ventas</option>
+            <option>Recursos Humanos</option>
+            <option>Operaciones</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Estatus</label>
+          <select id="f-estatus"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition">
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+            <option value="Licencia">Licencia</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Badges -->
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-2">Badges</label>
+        <div class="flex gap-2 mb-2">
+          <select id="f-badge-select"
+            class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition">
+            <option value="">— Agregar badge —</option>
+          </select>
+          <button onclick="addBadgeFromSelect()"
+            class="px-3 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-sm font-semibold transition">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+        <div id="f-badges-container" class="flex flex-wrap gap-2 min-h-[2rem]"></div>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="flex justify-end gap-3 mt-7 pt-5 border-t border-slate-100">
+      <button onclick="closeModal()"
+        class="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 text-sm font-medium transition">
+        Cancelar
+      </button>
+      <button onclick="saveEmployee()"
+        class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
+        <i class="fa-solid fa-floppy-disk mr-1"></i> Guardar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"
+  class="fixed bottom-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold
+         bg-slate-900 text-white opacity-0 pointer-events-none transition-opacity duration-300">
+  <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   CONFIGURACIÓN DE BADGES DISPONIBLES
+═══════════════════════════════════════════ */
+const BADGES_CATALOG = [
+  { id:'lider',    label:'Líder',          color:'bg-violet-50 text-violet-700 border-violet-200',  icon:'fa-star' },
+  { id:'mentor',   label:'Mentor',         color:'bg-amber-50 text-amber-700 border-amber-200',     icon:'fa-graduation-cap' },
+  { id:'fullstack',label:'Full Stack',     color:'bg-blue-50 text-blue-700 border-blue-200',        icon:'fa-code' },
+  { id:'qa',       label:'QA',             color:'bg-teal-50 text-teal-700 border-teal-200',        icon:'fa-bug' },
+  { id:'agile',    label:'Agile',          color:'bg-emerald-50 text-emerald-700 border-emerald-200',icon:'fa-arrows-spin' },
+  { id:'cloud',    label:'Cloud',          color:'bg-sky-50 text-sky-700 border-sky-200',           icon:'fa-cloud' },
+  { id:'seguridad',label:'Seguridad',      color:'bg-rose-50 text-rose-700 border-rose-200',        icon:'fa-shield-halved' },
+  { id:'diseño',   label:'Diseño UX',      color:'bg-pink-50 text-pink-700 border-pink-200',        icon:'fa-pen-ruler' },
+  { id:'ventas',   label:'Top Ventas',     color:'bg-orange-50 text-orange-700 border-orange-200',  icon:'fa-trophy' },
+  { id:'innovador',label:'Innovador',      color:'bg-indigo-50 text-indigo-700 border-indigo-200',  icon:'fa-lightbulb' },
+];
+
+const STATUS_STYLES = {
+  'Activo':   'bg-emerald-50 text-emerald-700 border-emerald-200',
+  'Inactivo': 'bg-slate-100 text-slate-500 border-slate-200',
+  'Licencia': 'bg-amber-50 text-amber-700 border-amber-200',
+};
+
+const AVATAR_COLORS = [
+  'bg-blue-100 text-blue-700','bg-violet-100 text-violet-700',
+  'bg-emerald-100 text-emerald-700','bg-amber-100 text-amber-700',
+  'bg-rose-100 text-rose-700','bg-teal-100 text-teal-700',
+];
+
+/* ═══════════════════════════════════════════
+   ESTADO
+═══════════════════════════════════════════ */
+let employees = [
+  { nombre:'Ana', apellido:'López',    correo:'ana@empresa.com',    dept:'Diseño',           estatus:'Activo',   badges:['diseño','mentor'] },
+  { nombre:'Carlos', apellido:'Ruiz',  correo:'carlos@empresa.com', dept:'Ingeniería',       estatus:'Activo',   badges:['fullstack','cloud','agile'] },
+  { nombre:'María', apellido:'Torres', correo:'maria@empresa.com',  dept:'Recursos Humanos', estatus:'Licencia', badges:['lider'] },
+  { nombre:'Jorge', apellido:'Méndez', correo:'jorge@empresa.com',  dept:'Ventas',           estatus:'Activo',   badges:['ventas','innovador'] },
+];
+
+let modalBadges = []; // badges temporales en el form
+
+/* ═══════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════ */
+function getBadge(id) { return BADGES_CATALOG.find(b => b.id === id); }
+
+function avatarColor(name) {
+  const idx = (name.charCodeAt(0) + (name.charCodeAt(1)||0)) % AVATAR_COLORS.length;
+  return AVATAR_COLORS[idx];
+}
+
+function initBadgeSelect() {
+  const sel = document.getElementById('f-badge-select');
+  sel.innerHTML = '<option value="">— Agregar badge —</option>';
+  BADGES_CATALOG.forEach(b => {
+    sel.innerHTML += `<option value="${b.id}">${b.label}</option>`;
+  });
+}
+
+function renderTable() {
+  const q    = document.getElementById('search-input').value.toLowerCase();
+  const dept = document.getElementById('dept-filter').value;
+  const tbody = document.getElementById('employees-tbody');
+  const empty = document.getElementById('empty-state');
+  const countLbl = document.getElementById('count-label');
+
+  const filtered = employees.filter((e,i) => {
+    const full = `${e.nombre} ${e.apellido} ${e.correo}`.toLowerCase();
+    return (!q || full.includes(q)) && (!dept || e.dept === dept);
+  });
+
+  tbody.innerHTML = '';
+
+  if (filtered.length === 0) {
+    empty.classList.remove('hidden');
+    countLbl.textContent = '';
+    return;
+  }
+  empty.classList.add('hidden');
+
+  filtered.forEach((e, fi) => {
+    const origIdx = employees.indexOf(e);
+    const initials = (e.nombre[0]||'') + (e.apellido[0]||'');
+    const avatarCls = avatarColor(e.nombre);
+    const statusCls = STATUS_STYLES[e.estatus] || STATUS_STYLES['Inactivo'];
+
+    const badgesHtml = (e.badges||[]).slice(0,3).map(id => {
+      const b = getBadge(id); if(!b) return '';
+      return `<span class="badge-pill ${b.color}"><i class="fa-solid ${b.icon} text-xs"></i>${b.label}</span>`;
+    }).join('') + (e.badges.length > 3 ? `<span class="text-xs text-slate-400 font-medium">+${e.badges.length-3}</span>` : '');
+
+    const tr = document.createElement('tr');
+    tr.className = 'employee-row animate-row';
+    tr.style.animationDelay = `${fi * 40}ms`;
+    tr.innerHTML = `
+      <td class="px-5 py-3.5">
+        <div class="flex items-center gap-3">
+          <div class="avatar ${avatarCls}">${initials}</div>
+          <div>
+            <p class="font-semibold text-slate-800">${e.nombre} ${e.apellido}</p>
+            <p class="text-xs text-slate-400 mono">${e.correo}</p>
+          </div>
+        </div>
+      </td>
+      <td class="px-5 py-3.5 hidden sm:table-cell text-slate-600">${e.dept || '—'}</td>
+      <td class="px-5 py-3.5 hidden md:table-cell">
+        <div class="flex flex-wrap gap-1.5">${badgesHtml || '<span class="text-slate-300 text-xs">Sin badges</span>'}</div>
+      </td>
+      <td class="px-5 py-3.5">
+        <span class="badge-pill ${statusCls}">${e.estatus}</span>
+      </td>
+      <td class="px-5 py-3.5 text-right">
+        <div class="flex items-center justify-end gap-1">
+          <button onclick="openModal('edit', ${origIdx})"
+            class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition flex items-center justify-center"
+            title="Editar">
+            <i class="fa-solid fa-pen text-xs"></i>
+          </button>
+          <button onclick="openBadgeManager(${origIdx})"
+            class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-violet-600 transition flex items-center justify-center"
+            title="Gestionar badges">
+            <i class="fa-solid fa-tag text-xs"></i>
+          </button>
+          <button onclick="deleteEmployee(${origIdx})"
+            class="w-8 h-8 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition flex items-center justify-center"
+            title="Eliminar">
+            <i class="fa-solid fa-trash text-xs"></i>
+          </button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+
+  countLbl.textContent = `${filtered.length} empleado${filtered.length !== 1 ? 's' : ''}`;
+}
+
+/* ═══════════════════════════════════════════
+   MODAL HELPERS
+═══════════════════════════════════════════ */
+function openModal(mode, idx = null) {
+  const backdrop = document.getElementById('modal-backdrop');
+  const title    = document.getElementById('modal-title');
+  modalBadges = [];
+
+  if (mode === 'edit' && idx !== null) {
+    const e = employees[idx];
+    title.textContent = 'Editar empleado';
+    document.getElementById('edit-index').value = idx;
+    document.getElementById('f-nombre').value   = e.nombre;
+    document.getElementById('f-apellido').value = e.apellido;
+    document.getElementById('f-correo').value   = e.correo;
+    document.getElementById('f-dept').value     = e.dept;
+    document.getElementById('f-estatus').value  = e.estatus;
+    modalBadges = [...(e.badges||[])];
+  } else {
+    title.textContent = 'Nuevo empleado';
+    document.getElementById('edit-index').value = '';
+    ['f-nombre','f-apellido','f-correo'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-dept').value = '';
+    document.getElementById('f-estatus').value = 'Activo';
+  }
+
+  renderModalBadges();
+  backdrop.classList.add('open');
+}
+
+function openBadgeManager(idx) { openModal('edit', idx); }
+
+function closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('open');
+}
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modal-backdrop')) closeModal();
+}
+
+/* ═══════════════════════════════════════════
+   BADGES EN MODAL
+═══════════════════════════════════════════ */
+function renderModalBadges() {
+  const container = document.getElementById('f-badges-container');
+  container.innerHTML = modalBadges.map(id => {
+    const b = getBadge(id); if(!b) return '';
+    return `<span class="badge-pill ${b.color}">
+      <i class="fa-solid ${b.icon} text-xs"></i>${b.label}
+      <button type="button" onclick="removeBadge('${id}')" title="Quitar badge">&times;</button>
+    </span>`;
+  }).join('') || '<span class="text-xs text-slate-400">Sin badges asignados</span>';
+}
+
+function addBadgeFromSelect() {
+  const sel = document.getElementById('f-badge-select');
+  const val = sel.value;
+  if (!val) return;
+  if (modalBadges.includes(val)) { showToast('Badge ya agregado', false); sel.value=''; return; }
+  modalBadges.push(val);
+  sel.value = '';
+  renderModalBadges();
+}
+
+function removeBadge(id) {
+  modalBadges = modalBadges.filter(b => b !== id);
+  renderModalBadges();
+}
+
+/* ═══════════════════════════════════════════
+   CRUD
+═══════════════════════════════════════════ */
+function saveEmployee() {
+  const nombre   = document.getElementById('f-nombre').value.trim();
+  const apellido = document.getElementById('f-apellido').value.trim();
+  const correo   = document.getElementById('f-correo').value.trim();
+  const dept     = document.getElementById('f-dept').value;
+  const estatus  = document.getElementById('f-estatus').value;
+  const idx      = document.getElementById('edit-index').value;
+
+  if (!nombre || !apellido || !correo) {
+    showToast('Nombre, apellido y correo son obligatorios.', false);
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+    showToast('Correo inválido.', false); return;
+  }
+
+  const emp = { nombre, apellido, correo, dept, estatus, badges: [...modalBadges] };
+
+  if (idx !== '') {
+    employees[parseInt(idx)] = emp;
+    showToast('Empleado actualizado');
+  } else {
+    employees.unshift(emp);
+    showToast('Empleado registrado');
+  }
+
+  closeModal();
+  renderTable();
+}
+
+function deleteEmployee(idx) {
+  if (!confirm(`¿Eliminar a ${employees[idx].nombre} ${employees[idx].apellido}?`)) return;
+  employees.splice(idx, 1);
+  renderTable();
+  showToast('Empleado eliminado', false);
+}
+
+function filterTable() { renderTable(); }
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+function showToast(msg, success = true) {
+  const t = document.getElementById('toast');
+  const icon = document.getElementById('toast-icon');
+  document.getElementById('toast-msg').textContent = msg;
+  icon.className = success
+    ? 'fa-solid fa-circle-check text-emerald-400'
+    : 'fa-solid fa-circle-exclamation text-amber-400';
+  t.style.opacity = '1';
+  setTimeout(() => t.style.opacity = '0', 2800);
+}
+
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+initBadgeSelect();
+renderTable();
+</script>
+</body>
+</html>
