@@ -6,7 +6,8 @@ from models.usuarios import Usuario
 from models.badges import Badge
 from models.certificaciones import Certificacion
 from models.reseñas import Reseña
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select, func
+from sqlalchemy.orm import Session
 from datetime import datetime
 from pathlib import Path
 import csv
@@ -30,34 +31,14 @@ Base.metadata.create_all(db)
 def dashboard():
     return render_template('index.html')
 
-
-@app.route('/stats')
-def stats():
-
-    return render_template(
-        'stats.html'
-    )
-
-
-@app.route('/domicilios/nuevo', methods=['GET', 'POST'])
-def nuevo_domicilio():
-    if request.method == 'POST':
-        payload = request.get_json(silent=True) or {}
-        numero_lote = str(payload.get('numero_lote', '')).strip()
-        titular = str(payload.get('titular', '')).strip()
-
-        if not numero_lote or not titular:
-            return jsonify({
-                'ok': False,
-                'message': 'Numero de lote y titular son obligatorios.'
-            }), 400
-
-        return jsonify({
-            'ok': True,
-            'message': 'Lote recibido. No se agregan puntos temporales al mapa.'
-        })
-
-    return render_template('nuevo_domicilio.html')
+@app.route('/api/certificaciones/<uuid_empresa>')
+def certificaciones(uuid_empresa):
+    with Session(db) as session:
+        stm = select(func.count(Certificacion.uuid)).select_from(Certificacion).where(Certificacion.uuid_empresa == uuid_empresa)
+        certs = session.execute(stm).scalar()
+        return jsonify([{
+            "count": certs
+        }])
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

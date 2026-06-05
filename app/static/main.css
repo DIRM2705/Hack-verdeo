@@ -1,7 +1,14 @@
+
+:root {
+    --color-secondary: #70845f;
+    --color-primary: #c5b2ad;
+    --text-color: #282e1a;
+}
+
 body {
 	font-family: 'Inter', system-ui, sans-serif;
-	background-color: #c5b2ad;
-	color: #282e1a;
+    background-color: var(--color-primary);
+	color: var(--text-color);
 	margin: 0;
 }
 
@@ -24,8 +31,8 @@ body {
 .sidebar {
 	width: 100%;
 	padding: 1.25rem;
-	background-color: #70845f;
-	color: #282e1a;
+	background-color: var(--color-secondary);
+	color: var(--text-color);
 }
 
 @media (min-width: 768px) {
@@ -45,7 +52,7 @@ body {
 .sidebar-subtitle {
 	margin: 0.25rem 0 0;
 	font-size: 0.875rem;
-	color: #282e1a;
+	color: var(--text-color);
 }
 
 .nav {
@@ -69,18 +76,18 @@ body {
 }
 
 .nav-link--active {
-	background-color: #c5b2ad;
-	color: #282e1a;
+	background-color: var(--color-primary);
+	color: var(--text-color);
 	font-weight: 500;
 }
 
 .nav-link--default {
-	color: #282e1a;
+	color: var(--text-color);
 }
 
 .nav-link--default:hover {
 	background-color: rgba(255, 255, 255, 0.18);
-	color: #1f2937;
+	color: var(--text-color);
 }
 
 .page-main {
