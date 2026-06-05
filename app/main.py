@@ -1,4 +1,12 @@
 import os
+from models.base import Base
+from models.empresa import Empresa
+from models.empleado import Empleado
+from models.usuarios import Usuario
+from models.badges import Badge
+from models.certificaciones import Certificacion
+from models.reseñas import Reseña
+from sqlalchemy import create_engine
 from datetime import datetime
 from pathlib import Path
 import csv
@@ -10,6 +18,11 @@ from flask import Flask, jsonify, redirect, render_template, request, session, u
 
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:1234@localhost:3306/VERDEO'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+Base.metadata.create_all(db)
+
 
 
 
