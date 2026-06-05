@@ -1,6 +1,7 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from models.empresa import Empresa
+from models.certificaciones import Certificacion
 
 EMPRESAS = [
     {
@@ -14,6 +15,15 @@ EMPRESAS = [
     }
 ]
 
+CERTIFICACIONES = [
+    {
+        "nombre": "Distintivo H",
+        "empresa": "CARPE DIEM",
+        "fecha_vencimiento": "2025-12-31",
+        "url_certificado": "https://www.gob.mx/cms/uploads/attachment/file/123456/distintivo_h.pdf"
+    }
+]
+        
 
 def seed_empresas(session: Session):
     empresas = []
@@ -29,14 +39,34 @@ def seed_empresas(session: Session):
         )
         empresas.append(empresa)
     session.add_all(empresas)
+    
+def clear_data(session: Session):
+    session.query(Certificacion).delete()
+    session.query(Empresa).delete()
+    
+def seed_certificaciones(session: Session):
+    certificaciones = []
+    for certificacion in CERTIFICACIONES:
+        stmt = select(Empresa).where(Empresa.nombre == certificacion["empresa"]).limit(1)
+        empresa = session.execute(stmt).scalar_one()
+        certificacion = Certificacion(
+            nombre=certificacion["nombre"],
+            fecha_vencimiento=certificacion["fecha_vencimiento"],
+            url_certificado=certificacion["url_certificado"],
+            empresa_uuid=empresa.uuid
+        )
+        certificaciones.append(certificacion)
+    session.add_all(certificaciones)
 
 def seed():
     engine = create_engine('mysql+pymysql://root:1234@localhost:3306/VERDEO')
     with Session(engine) as session:
         print("Sembrando datos...")
         
-        #Sembrado de datos    
+        #Sembrado de datos   
+        clear_data(session) 
         seed_empresas(session)
+        seed_certificaciones(session)
         
         #Guardar cambios en la base de datos
         session.commit()
