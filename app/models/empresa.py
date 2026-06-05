@@ -1,6 +1,6 @@
 from models.base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, Uuid
+from sqlalchemy import Integer, String, Uuid, Float
 from uuid import uuid4, UUID
 
 class Empresa(Base):
@@ -14,5 +14,7 @@ class Empresa(Base):
     colonia: Mapped[str] = mapped_column(String(255), nullable=False)
     ciudad: Mapped[str] = mapped_column(String(255), nullable=False)
     estado: Mapped[str] = mapped_column(String(255), nullable=False)
+    latitud: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    longitud: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     
     

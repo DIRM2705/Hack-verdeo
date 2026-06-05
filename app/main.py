@@ -35,6 +35,23 @@ def dashboard(uuid_empresa: str):
     ejemplo_uuid = 'a0c48199a44a4f22be0c43ade5ddd630'
     return render_template('empresa.html', empresa_uuid=ejemplo_uuid)
 
+@app.route('/api/negocios')
+def negocios():
+    empresas = []
+    with Session(db) as session: 
+        stm = select(Empresa)
+        negocios = session.execute(stm).scalars().all()
+        for negocio in negocios:
+            empresas.append({
+                "nombre": negocio.nombre,
+                "ubicacion": {
+                    "lat": negocio.latitud,
+                    "lng": negocio.longitud
+                },
+                "calidad": "bueno"  # Aquí podrías calcular la calidad real basada en reseñas o certificaciones
+            })
+    return jsonify(negocios)
+
 
 @app.route('/normativas/<uuid_empresa>')
 def normativas_page(uuid_empresa : str):

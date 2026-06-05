@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
+from models.empleado import Empleado
 from models.usuarios import Usuario
 from models.reseñas import Reseña
 from models.empresa import Empresa
@@ -13,7 +14,9 @@ EMPRESAS = [
         "numero_interior": None,
         "colonia": "SAN JERÓNIMO LÍDICE",
         "ciudad": "PUEBLA",
-        "estado": "PUEBLA"  
+        "estado": "PUEBLA" ,
+        "latitud": 19.0379,
+        "longitud": -98.2062
     }
 ]
 
@@ -45,6 +48,27 @@ USUARIOS = [
     }
 ]
 
+EMPLEADOS = [
+    {
+        "empresa": "CARPE DIEM",
+        "nombres": "María",
+        "apellidos": "Gómez"
+    }
+]
+
+def seed_empleados(session: Session):
+    empleados = []
+    for empleado in EMPLEADOS:
+        stmt = select(Empresa).where(Empresa.nombre == empleado["empresa"]).limit(1)
+        empresa = session.execute(stmt).scalar_one()
+        empleado = Empleado(
+            empresa_uuid=empresa.uuid,
+            nombres=empleado["nombres"],
+            apellidos=empleado["apellidos"]
+        )
+        empleados.append(empleado)
+    session.add_all(empleados)
+
 def seed_empresas(session: Session):
     empresas = []
     for empresa in EMPRESAS:
@@ -55,13 +79,16 @@ def seed_empresas(session: Session):
             numero_interior=empresa["numero_interior"],
             colonia=empresa["colonia"],
             ciudad=empresa["ciudad"],
-            estado=empresa["estado"]
+            estado=empresa["estado"],
+            latitud=empresa["latitud"],
+            longitud=empresa["longitud"]
         )
         empresas.append(empresa)
     session.add_all(empresas)
     
 def clear_data(session: Session):
     session.query(Certificacion).delete()
+    session.query(Empleado).delete()
     session.query(Empresa).delete()
     session.query(Reseña).delete()
     session.query(Usuario).delete()
@@ -120,6 +147,7 @@ def seed():
         seed_usuarios(session)
         seed_certificaciones(session)
         seed_reseñas(session)
+        seed_empleados(session)
         
         #Guardar cambios en la base de datos
         session.commit()

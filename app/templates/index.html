@@ -2,8 +2,11 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Panel de Administración - Fraccionamiento / Locales</title>
+    <!-- Leaflet CSS + JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --sidebar-bg: #7b8b6f;
@@ -205,18 +208,43 @@
         
         .stars { color: #b8860b; font-weight: 700; letter-spacing: 0.03em; }
 
-        /* --- Map Placeholder --- */
+        /* --- Mapa Leaflet optimizado --- */
         .map-container {
             width: 100%;
-            height: 400px;
+            height: 500px;
             background-color: #e5e5e5;
             border-radius: var(--border-radius);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px dashed #999;
-            color: #666;
-            font-weight: bold;
+            border: 1px solid rgba(0,0,0,0.15);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #leaflet-map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Leyenda colores */
+        .map-legend {
+            background: rgba(255,255,255,0.9);
+            padding: 10px 14px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border: 1px solid #ccc;
+        }
+        .legend-color {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .legend-item {
+            margin-bottom: 4px;
         }
 
         /* --- Accordion (Interactividad) --- */
@@ -245,7 +273,7 @@
         }
 
         .accordion-btn::after {
-            content: '\25BC'; /* Flecha abajo */
+            content: '\25BC';
             font-size: 0.9rem;
             color: var(--accent);
             transition: transform 0.25s ease;
@@ -284,6 +312,21 @@
         .tag-green { color: #2d5a27; font-weight: bold; }
         .tag-red { color: #a12a2a; font-weight: bold; }
 
+        /* loading spinner para el mapa */
+        .map-loading {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border-radius: 12px;
+            position: absolute;
+            top: 45%;
+            left: 40%;
+            z-index: 1000;
+            font-weight: bold;
+            background: rgba(0,0,0,0.6);
+        }
+
         @media (max-width: 980px) {
             .grid-2-col,
             .accordion-inner-grid {
@@ -316,6 +359,7 @@
     <aside class="sidebar">
         <h2>Panel</h2>
         <button class="nav-btn active" onclick="showSection('resumen', this)">📊 Resumen General</button>
+        <button class="nav-btn" onclick="showSection('clientes', this)">🗺️ Mapa Interactivo</button>
     </aside>
 
     <!-- Contenido Principal -->
@@ -323,12 +367,13 @@
         
         <div class="header">
             <div class="header-title">
-                <h1 id="page-title">Higiene</h1>
-                <p id="page-subtitle">Información para una buena higiene.</p>
+                <h1 id="page-title">Información acerca de plagas</h1>
+                <p id="page-subtitle">Información clave y localización de negocios.</p>
             </div>
+            <div class="admin-badge">👤 Admin</div>
         </div>
 
-        <!-- SECCIÓN 1: RESUMEN GENERAL (Minimizada para dar protagonismo a NOMs en esta demo) -->
+        <!-- SECCIÓN 1: RESUMEN GENERAL -->
         <section id="resumen" class="content-section active">
             <div class="section-intro">
                 <p>Información clave y recomendaciones para mantener tu local seguro, limpio y alineado con los requisitos sanitarios.</p>
@@ -368,21 +413,31 @@
                             <li><strong>5. Dictamen:</strong> Si "PROCEDE", se otorga el certificado oficial.</li>
                         </ul>
                     </div>
-                    <img src= https://thefoodtech.com/wp-content/uploads/2022/11/comer-y-beber-inocuidad-1-828x548.jpg alt="Inspección de calidad">
+                    <img src="https://thefoodtech.com/wp-content/uploads/2022/11/comer-y-beber-inocuidad-1-828x548.jpg" alt="Inspección de calidad">
                 </div>
             </div>
         </section>
 
+        <!-- SECCIÓN 2: MAPA DE NEGOCIOS con Leaflet -->
+        <section id="clientes" class="content-section">
+            <div class="card">
+                <h3>📍 Ubicación y Calificación de Negocios</h3>
+                <p>Marcadores por nivel de calidad: <span style="background:#2e7d32; color:white; padding:2px 6px; border-radius:20px;">✔ Bueno</span> 
+                <span style="background:#f9a825; color:white; padding:2px 6px; border-radius:20px;">🟡 Regular</span> 
+                <span style="background:#c62828; color:white; padding:2px 6px; border-radius:20px;">❌ Malo</span>
+                </p>
+                <div class="map-container" id="mapContainer">
+                    <div id="leaflet-map"></div>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <!-- Script para navegación y acordeones -->
     <script>
-        // Navegación entre pantallas
+        // ---------- Navegación entre pestañas ----------
         const titles = {
-            'resumen': { title: 'Resumen General', subtitle: 'Información clave y rápida del fraccionamiento.' },
-            'negocios': { title: 'Mi Local', subtitle: 'Gestiona tus certificaciones e historial.' },
-            'clientes': { title: 'Mapa Interactivo', subtitle: 'Visualiza a tus clientes.' },
-            'normativas': { title: 'NOMs y Certificaciones', subtitle: 'Haz clic en los temas para expandir la información.' }
+            'resumen': { title: 'Información acerca de plagas', subtitle: 'Información clave y recomendaciones sanitarias para el fraccionamiento.' },
+            'clientes': { title: 'Mapa Interactivo de Negocios', subtitle: 'Visualiza ubicación, nombre y calificación (Bueno/Regular/Malo) de cada local.' },
         };
 
         function showSection(sectionId, element) {
@@ -394,9 +449,19 @@
 
             document.getElementById('page-title').innerText = titles[sectionId].title;
             document.getElementById('page-subtitle').innerText = titles[sectionId].subtitle;
+
+            // Si se cambia a la sección mapa y el mapa aún no fue inicializado, lanzar carga
+            if (sectionId === 'clientes' && window.mapInstance === undefined) {
+                initLeafletMap();
+            } else if (sectionId === 'clientes' && window.mapInstance) {
+                // Si ya existe, solo refrescamos el tamaño del mapa por si hubo cambio de contenedor invisible
+                setTimeout(() => {
+                    if (window.mapInstance) window.mapInstance.invalidateSize();
+                }, 200);
+            }
         }
 
-        // Lógica de Acordeones
+        // ---------- Acordeón ----------
         function toggleAccordion(element) {
             element.classList.toggle("active");
             let content = element.nextElementSibling;
@@ -406,6 +471,275 @@
                 content.style.display = "block";
             }
         }
+
+        // ---------- GESTIÓN DEL MAPA CON LEAFLET Y CONSUMO API /api/negocios ----------
+        let map = null;
+        let markerLayerGroup = null;   // para gestionar marcadores dinámicamente si se recarga
+        window.mapInstance = undefined;
+
+        // función para obtener color según calificación
+        function getColorByRating(rating) {
+            const ratingLower = String(rating).toLowerCase().trim();
+            if (ratingLower === "bueno") return "#2e7d32";     // verde
+            if (ratingLower === "regular") return "#f9a825";   // amarillo
+            if (ratingLower === "malo") return "#c62828";      // rojo
+            return "#888888"; // gris por defecto
+        }
+
+        // Crear ícono personalizado con círculo de color (más vistoso)
+        function createCustomIcon(color, nombre = "") {
+            // Se puede generar marcador redondo con color dinámico usando divIcon
+            return L.divIcon({
+                html: `<div style="background-color: ${color}; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 14px; font-weight: bold; color: white;">📍</div>`,
+                iconSize: [28, 28],
+                className: 'custom-marker-icon',
+                popupAnchor: [0, -14]
+            });
+        }
+
+        // Cargar los negocios desde la API Flask (ruta /api/negocios) y mostrarlos en mapa
+        async function loadBusinessesAndAddMarkers() {
+            if (!map) {
+                console.warn("Mapa no inicializado aún");
+                return;
+            }
+            // limpiar capa de marcadores anterior si existe
+            if (markerLayerGroup) {
+                map.removeLayer(markerLayerGroup);
+            }
+            markerLayerGroup = L.layerGroup().addTo(map);
+            
+            // Mostrar indicador de carga dentro del mapa (opcional)
+            const loadingControl = document.createElement('div');
+            loadingControl.className = 'map-loading';
+            loadingControl.innerText = 'Cargando negocios...';
+            document.getElementById('mapContainer')?.appendChild(loadingControl);
+            
+            try {
+                // IMPORTANTE: La API debe estar en la misma origen o con CORS habilitado.
+                // Usamos fetch relativo a la raíz actual. Si Flask sirve el front, funciona.
+                const response = await fetch('/api/negocios');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const negocios = await response.json();
+                if (loadingControl) loadingControl.remove();
+                
+                // Validar que es un array
+                if (!Array.isArray(negocios)) {
+                    console.error("La respuesta no es un array:", negocios);
+                    mostrarMensajeMapa("Error: formato de datos inválido.");
+                    return;
+                }
+                
+                if (negocios.length === 0) {
+                    mostrarMensajeMapa("No hay negocios registrados en el API.");
+                    return;
+                }
+                
+                // Agrupar bounds para ajustar vista
+                const bounds = [];
+                
+                negocios.forEach(negocio => {
+                    // Se espera que cada objeto tenga: nombre, ubicación (lat/lng o coordenadas), calidad ("Bueno","Regular","Malo")
+                    // Ejemplo: { nombre: "Tacos Don Juan", ubicación: { lat: 19.4326, lng: -99.1332 }, calidad: "Bueno" }
+                    let lat, lng;
+                    const ubic = negocio.ubicacion;
+                    if (ubic && typeof ubic === 'object') {
+                        lat = ubic.lat;
+                        lng = ubic.lng;
+                    } else if (Array.isArray(ubic) && ubic.length === 2) {
+                        lat = ubic[0];
+                        lng = ubic[1];
+                    } else {
+                        console.warn("Ubicación inválida en negocio:", negocio);
+                        return;
+                    }
+                    if (lat === undefined || lng === undefined || isNaN(lat) || isNaN(lng)) return;
+                    
+                    const calidad = negocio.calidad || "Regular";
+                    const color = getColorByRating(calidad);
+                    const icon = createCustomIcon(color, negocio.nombre);
+                    
+                    // Popup con información detallada
+                    const popupContent = `
+                        <div style="font-family: 'Segoe UI', sans-serif; min-width: 160px;">
+                            <strong style="font-size: 1rem;">🏢 ${escapeHtml(negocio.nombre) || "Sin nombre"}</strong><br/>
+                            <span style="display:inline-block; margin-top:6px;">⭐ Calificación: 
+                                <span style="background:${color}; color:white; padding:2px 8px; border-radius:20px; font-size:0.8rem;">${escapeHtml(calidad)}</span>
+                            </span><br/>
+                            <span style="font-size:0.8rem; color:#444;">📍 Coordenadas: ${lat.toFixed(5)}, ${lng.toFixed(5)}</span>
+                        </div>
+                    `;
+                    
+                    const marker = L.marker([lat, lng], { icon: icon })
+                        .bindPopup(popupContent)
+                        .openPopup();  // opcional, dejamos que se abra al hacer clic (por defecto no se abre automático, pero es mejor al clic)
+                    
+                    marker.addTo(markerLayerGroup);
+                    bounds.push([lat, lng]);
+                });
+                
+                // Ajustar el zoom para que se vean todos los marcadores
+                if (bounds.length > 0) {
+                    const groupBounds = L.latLngBounds(bounds);
+                    map.fitBounds(groupBounds, { padding: [40, 40] });
+                } else {
+                    // vista por defecto si no hay marcadores válidos
+                    map.setView([19.4326, -99.1332], 12);
+                    mostrarMensajeMapa("No se encontraron ubicaciones válidas para mostrar.");
+                }
+                
+                // Agregar leyenda personalizada al mapa (capa de control)
+                addLegendToMap();
+                
+            } catch (error) {
+                console.error("Error al cargar /api/negocios:", error);
+                if (loadingControl) loadingControl.remove();
+                mostrarMensajeMapa(`Error al cargar datos: ${error.message}. Verifica que el servidor Flask esté sirviendo /api/negocios.`);
+            }
+        }
+        
+        // función para mostrar mensaje de error o aviso dentro del contenedor mapa
+        function mostrarMensajeMapa(mensaje) {
+            const container = document.getElementById('mapContainer');
+            let msgDiv = document.getElementById('map-error-msg');
+            if (!msgDiv) {
+                msgDiv = document.createElement('div');
+                msgDiv.id = 'map-error-msg';
+                msgDiv.style.position = 'absolute';
+                msgDiv.style.bottom = '20px';
+                msgDiv.style.left = '20px';
+                msgDiv.style.background = 'rgba(0,0,0,0.75)';
+                msgDiv.style.color = '#ffeb3b';
+                msgDiv.style.padding = '8px 14px';
+                msgDiv.style.borderRadius = '30px';
+                msgDiv.style.fontSize = '0.85rem';
+                msgDiv.style.zIndex = '1000';
+                msgDiv.style.maxWidth = '80%';
+                msgDiv.style.backdropFilter = 'blur(4px)';
+                container.style.position = 'relative';
+                container.appendChild(msgDiv);
+            }
+            msgDiv.innerText = mensaje;
+            setTimeout(() => {
+                if (msgDiv) msgDiv.style.opacity = '0';
+                setTimeout(() => { if(msgDiv) msgDiv.remove(); }, 2000);
+            }, 4000);
+        }
+        
+        // Escapar HTML para evitar XSS
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+                return c;
+            });
+        }
+        
+        // Añadir leyenda de colores al mapa (esquina inferior derecha)
+        function addLegendToMap() {
+            // Si ya existe la leyenda, la eliminamos antes de recrear
+            const existingLegend = document.querySelector('.leaflet-bottom .map-legend');
+            if (existingLegend) existingLegend.remove();
+            
+            const LegendControl = L.Control.extend({
+                options: { position: 'bottomright' },
+                onAdd: function() {
+                    const div = L.DomUtil.create('div', 'map-legend');
+                    div.innerHTML = `
+                        <div style="font-weight:bold; margin-bottom:5px;">Calidad del negocio</div>
+                        <div class="legend-item"><span class="legend-color" style="background:#2e7d32;"></span> Bueno</div>
+                        <div class="legend-item"><span class="legend-color" style="background:#f9a825;"></span> Regular</div>
+                        <div class="legend-item"><span class="legend-color" style="background:#c62828;"></span> Malo</div>
+                        <hr style="margin:5px 0;">
+                        <div style="font-size:11px;">Datos desde API Flask</div>
+                    `;
+                    return div;
+                }
+            });
+            const legend = new LegendControl();
+            legend.addTo(map);
+        }
+        
+        // Inicializar mapa Leaflet con capa base OpenStreetMap
+        function initLeafletMap() {
+            if (window.mapInstance && map) {
+                // si ya está inicializado, solo invalidar tamaño y recargar negocios
+                setTimeout(() => {
+                    map.invalidateSize();
+                    loadBusinessesAndAddMarkers();
+                }, 150);
+                return;
+            }
+            
+            const mapElement = document.getElementById('leaflet-map');
+            if (!mapElement) return;
+            
+            // Coordenadas por defecto (centro aproximado Ciudad de México)
+            map = L.map('leaflet-map').setView([19.4326, -99.1332], 13);
+            window.mapInstance = map;
+            
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; CartoDB',
+                subdomains: 'abcd',
+                maxZoom: 19,
+                minZoom: 10
+            }).addTo(map);
+            
+            // Cargar negocios desde API
+            loadBusinessesAndAddMarkers();
+            
+            // Escuchar resize de ventana para mantener el mapa correcto
+            window.addEventListener('resize', () => {
+                if (map) map.invalidateSize();
+            });
+        }
+        
+        // Si la sección mapa está visible al cargar la página, inicializar, si no, esperar a que se seleccione
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicialmente la sección activa es 'resumen'. Mapa no se carga hasta que se haga clic en pestaña clientes
+            // esto mejora rendimiento. Pero por si el usuario recarga y la URL tiene anchor? No hay problema.
+            // También si se desea cargar en segundo plano, comentar. Pero seguimos la premisa: mapa creado al cambiar a pestaña.
+            // Sin embargo, por si acaso, revisamos si la sección clientes está activa por algún motivo.
+            const activeSection = document.querySelector('.content-section.active');
+            if (activeSection && activeSection.id === 'clientes') {
+                initLeafletMap();
+            } else {
+                // Preparar placeholder visual, pero la inicialización real será en showSection
+                // Crear referencia para no generar conflicto.
+            }
+        });
+        
+        // Parche adicional: si alguien llama showSection clientes y aún no existe el mapa, initMap
+        const originalShow = window.showSection;
+        window.showSection = function(sectionId, element) {
+            originalShow(sectionId, element);
+            if (sectionId === 'clientes') {
+                setTimeout(() => {
+                    if (!window.mapInstance) {
+                        initLeafletMap();
+                    } else if (map) {
+                        // refrescar datos y ajustar tamaño por si cambió contenedor
+                        map.invalidateSize();
+                        // también recargar marcadores por si la API cambió dinámicamente
+                        loadBusinessesAndAddMarkers();
+                    }
+                }, 120);
+            }
+        };
+        
+        // exponer globalmente funciones que ya existen
+        window.toggleAccordion = toggleAccordion;
+        
+        // Pequeño fix: asegurar que el botón de resumen muestre título correcto
+        // Forzar títulos iniciales:
+        document.getElementById('page-title').innerText = titles['resumen'].title;
+        document.getElementById('page-subtitle').innerText = titles['resumen'].subtitle;
     </script>
 </body>
 </html>
