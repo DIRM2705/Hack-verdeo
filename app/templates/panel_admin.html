@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,7 +39,7 @@
             padding: 28px 22px;
             display: flex;
             flex-direction: column;
-            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 2px 0 20px rgba(0,0,0,0.08);
             z-index: 10;
         }
 
@@ -109,7 +108,7 @@
             padding: 10px 18px;
             border-radius: 999px;
             font-weight: 700;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
             font-size: 0.95rem;
             color: var(--sidebar-bg);
             border: 1px solid rgba(90, 130, 255, 0.16);
@@ -126,15 +125,8 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* --- Cards and Layout --- */
@@ -148,7 +140,7 @@
             background-color: rgba(255, 255, 255, 0.88);
             padding: 28px;
             border-radius: calc(var(--border-radius) + 4px);
-            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.06);
             margin-bottom: 24px;
             border: 1px solid rgba(136, 152, 255, 0.12);
         }
@@ -184,9 +176,7 @@
             color: #424a5d;
         }
 
-        .card p {
-            margin-bottom: 1rem;
-        }
+        .card p { margin-bottom: 1rem; }
 
         ul {
             margin-left: 1.2rem;
@@ -206,18 +196,14 @@
             margin-bottom: 14px;
             border: 1px solid rgba(100, 123, 255, 0.12);
         }
-
+        
         .review p {
             margin: 0;
             color: #4e5770;
             line-height: 1.8;
         }
-
-        .stars {
-            color: #b8860b;
-            font-weight: 700;
-            letter-spacing: 0.03em;
-        }
+        
+        .stars { color: #b8860b; font-weight: 700; letter-spacing: 0.03em; }
 
         /* --- Map Placeholder --- */
         .map-container {
@@ -251,17 +237,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        .accordion-btn.active,
-        .accordion-btn:hover {
+        .accordion-btn.active, .accordion-btn:hover {
             background-color: rgba(74, 109, 255, 0.15);
         }
 
         .accordion-btn::after {
-            content: '\25BC';
-            /* Flecha abajo */
+            content: '\25BC'; /* Flecha abajo */
             font-size: 0.9rem;
             color: var(--accent);
             transition: transform 0.25s ease;
@@ -294,21 +278,13 @@
             border-radius: var(--border-radius);
             object-fit: cover;
             height: 200px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .tag-green {
-            color: #2d5a27;
-            font-weight: bold;
-        }
-
-        .tag-red {
-            color: #a12a2a;
-            font-weight: bold;
-        }
+        .tag-green { color: #2d5a27; font-weight: bold; }
+        .tag-red { color: #a12a2a; font-weight: bold; }
 
         @media (max-width: 980px) {
-
             .grid-2-col,
             .accordion-inner-grid {
                 grid-template-columns: 1fr;
@@ -334,57 +310,123 @@
         }
     </style>
 </head>
-
 <body>
 
     <!-- Panel Lateral -->
     <aside class="sidebar">
         <h2>Panel</h2>
-        <button class="nav-btn"
-            onclick="window.location.href='{{ url_for('dashboard', uuid_empresa=empresa_uuid) }}'">🏪 Mi Local</button>
-        <button class="nav-btn"
-            onclick="window.location.href='{{ url_for('empleados_page', uuid_empresa=empresa_uuid) }}'">👥
-            Empleados</button>
-        <button class="nav-btn active"
-            onclick="window.location.href='{{ url_for('normativas_page', uuid_empresa=empresa_uuid) }}'">📋 Normativas y
-            Plagas</button>
+        <button class="nav-btn active" onclick="showSection('resumen', this)">📊 Resumen General</button>
+        <button class="nav-btn" onclick="showSection('negocios', this)">🏪 Mi Local</button>
+        <button class="nav-btn" onclick="showSection('clientes', this)">🗺️ Mapa Interactivo</button>
+        <button class="nav-btn" onclick="showSection('normativas', this)">📋 NOMs y Certificaciones</button>
     </aside>
 
     <!-- Contenido Principal -->
     <main class="main-content">
-
+        
         <div class="header">
             <div class="header-title">
-                <h1 id="page-title">Normativas y Plagas</h1>
-                <p id="page-subtitle">Información clave sobre normativas y prevención de plagas.</p>
+                <h1 id="page-title">Resumen General</h1>
+                <p id="page-subtitle">Información clave y rápida de tu fraccionamiento o local.</p>
             </div>
             <div class="admin-badge">👤 Admin</div>
         </div>
 
-        <!-- SECCIÓN 4: NORMATIVAS Y PREVENCIÓN (REDISEÑADA CON ACORDEONES) -->
-        <section id="normativas" class="content-section active">
-
-            <h2 style="margin-bottom: 15px; color: var(--sidebar-bg);">Regulaciones Oficiales
-            </h2>
-
-            <!-- Acordeón 1 -->
-            <button class="accordion-btn" onclick="toggleAccordion(this)">📌 ¿Qué es la NOM-251 y Conceptos
-                Clave?</button>
+        <!-- SECCIÓN 1: RESUMEN GENERAL (Minimizada para dar protagonismo a NOMs en esta demo) -->
+        <section id="resumen" class="content-section active">
+            <div class="section-intro">
+                <p>Información clave y recomendaciones para mantener tu local seguro, limpio y alineado con los requisitos sanitarios.</p>
+            </div>
+            <div class="card">
+                <h3>Comunidad Limpia y Antiplagas</h3>
+                <p>La seguridad alimentaria y prevención de plagas es tarea de todos.</p>
+                <div class="grid-2-col" style="margin-top: 15px;">
+                    <div>
+                        <strong>🏪 Comerciantes:</strong>
+                        <ul>
+                            <li>Basura en contenedores herméticos.</li>
+                            <li>Limpieza profunda diaria sin agua estancada.</li>
+                            <li>Fumigación preventiva certificada.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong>👥 Consumidores:</strong>
+                        <ul>
+                            <li>Depositar basura solo en lugares asignados.</li>
+                            <li>No alimentar fauna callejera cerca de locales.</li>
+                            <li>Exigir higiene y reportar malas prácticas.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="accordion-btn" onclick="toggleAccordion(this)">📄 Proceso para Certificación COFEPRIS</button>
             <div class="accordion-content">
                 <div class="accordion-inner-grid">
                     <div>
-                        <p>Norma que establece prácticas mínimas de higiene en la elaboración y venta de alimentos para
-                            proteger la salud.</p>
                         <ul>
-                            <li><strong>Inocuidad:</strong> Asegura que el alimento no causará daño.</li>
-                            <li><strong>Contaminación Cruzada:</strong> Transferir contaminantes de un
-                                alimento/superficie a otro.</li>
-                            <li><strong>Sistema PEPS:</strong> "Primeras Entradas – Primeras Salidas". Usar primero lo
-                                más antiguo.</li>
+                            <li><strong>1. Autoevaluación:</strong> Cumplir mínimo 85% de la NOM-251.</li>
+                            <li><strong>2. Documentación:</strong> Aviso de funcionamiento vigente.</li>
+                            <li><strong>3. Solicitud:</strong> Formato COFEPRIS-01-020 y pago en DIGIPRIS o CIS.</li>
+                            <li><strong>4. Verificación:</strong> Visita de inspectores sanitarios.</li>
+                            <li><strong>5. Dictamen:</strong> Si "PROCEDE", se otorga el certificado oficial.</li>
                         </ul>
                     </div>
-                    <img src=https://mundococina.es/wp-content/uploads/2019/05/contaminacion-cruzada-alimentos-directa-indirecta.jpg
-                        alt="Alimentos frescos e inocuos">
+                    <img src= https://thefoodtech.com/wp-content/uploads/2022/11/comer-y-beber-inocuidad-1-828x548.jpg alt="Inspección de calidad">
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: NEGOCIOS (MI LOCAL) -->
+        <section id="negocios" class="content-section">
+            <div class="grid-2-col">
+                <div class="card">
+                    <h3>Perfil del Local</h3>
+                    <p><strong>Nombre:</strong> La Piazza Restaurante</p>
+                    <p><strong>Giro:</strong> Alimentos y Bebidas</p><br>
+                    <h3>Certificaciones</h3>
+                    <ul>
+                        <li><strong>Actual:</strong> Distintivo H - <span class="tag-green">Activa</span></li>
+                        <li><strong>Próxima renovación:</strong> 15 de Octubre, 2026</li>
+                        <li><strong>Historial:</strong> 3 años renovando sin interrupciones.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Opiniones Recientes</h3>
+                    <div class="review"><span class="stars">★★★★★</span><p>"Impecable limpieza y excelente manejo."</p></div>
+                    <div class="review"><span class="stars">★★★★☆</span><p>"Se nota que cuidan la sanidad del lugar."</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: MAPA DE CLIENTES -->
+        <section id="clientes" class="content-section">
+            <div class="card">
+                <h3>Ubicación y Cobertura</h3>
+                <div class="map-container">
+                    [ Mapa Interactivo (Ej. Google Maps API) ]
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 4: NORMATIVAS Y PREVENCIÓN (REDISEÑADA CON ACORDEONES) -->
+        <section id="normativas" class="content-section">
+            
+            <h2 style="margin-bottom: 15px; color: var(--sidebar-bg);">Regulaciones Oficiales (Haz clic para expandir)</h2>
+
+            <!-- Acordeón 1 -->
+            <button class="accordion-btn" onclick="toggleAccordion(this)">📌 ¿Qué es la NOM-251 y Conceptos Clave?</button>
+            <div class="accordion-content">
+                <div class="accordion-inner-grid">
+                    <div>
+                        <p>Norma que establece prácticas mínimas de higiene en la elaboración y venta de alimentos para proteger la salud.</p>
+                        <ul>
+                            <li><strong>Inocuidad:</strong> Asegura que el alimento no causará daño.</li>
+                            <li><strong>Contaminación Cruzada:</strong> Transferir contaminantes de un alimento/superficie a otro.</li>
+                            <li><strong>Sistema PEPS:</strong> "Primeras Entradas – Primeras Salidas". Usar primero lo más antiguo.</li>
+                        </ul>
+                    </div>
+                    <img src= https://mundococina.es/wp-content/uploads/2019/05/contaminacion-cruzada-alimentos-directa-indirecta.jpg alt="Alimentos frescos e inocuos">
                 </div>
             </div>
 
@@ -393,8 +435,7 @@
             <div class="accordion-content">
                 <div class="accordion-inner-grid">
                     <div>
-                        <p><strong>Instalaciones:</strong> Pisos/paredes sin grietas, buena iluminación, ventilación,
-                            protección contra plagas, agua potable y drenajes limpios.</p>
+                        <p><strong>Instalaciones:</strong> Pisos/paredes sin grietas, buena iluminación, ventilación, protección contra plagas, agua potable y drenajes limpios.</p>
                         <p><strong>Equipo:</strong></p>
                         <ul>
                             <li>Fáciles de limpiar y resistentes a la corrosión.</li>
@@ -402,8 +443,7 @@
                             <li>Limpieza y desinfección frecuente.</li>
                         </ul>
                     </div>
-                    <img src=https://lecrom.com/wp-content/uploads/2021/04/11-razones-para-cambiarte-a-las-cocinas-de-acero-inoxidable.jpg
-                        alt="Cocina de acero inoxidable">
+                    <img src= https://lecrom.com/wp-content/uploads/2021/04/11-razones-para-cambiarte-a-las-cocinas-de-acero-inoxidable.jpg alt="Cocina de acero inoxidable">
                 </div>
             </div>
 
@@ -412,8 +452,7 @@
             <div class="accordion-content">
                 <div class="accordion-inner-grid">
                     <div>
-                        <p><strong>Recepción:</strong> <span class="tag-red">RECHAZAR</span> productos caducados, rotos,
-                            con plagas o descongelados previamente.</p>
+                        <p><strong>Recepción:</strong> <span class="tag-red">RECHAZAR</span> productos caducados, rotos, con plagas o descongelados previamente.</p>
                         <p><strong>Temperaturas de Control:</strong></p>
                         <ul>
                             <li>Refrigeración: Máximo 7°C | Congelación: 100% congelado.</li>
@@ -426,8 +465,7 @@
                             <li>Pollo/Rellenos/Recalentado: 74°C</li>
                         </ul>
                     </div>
-                    <img src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=400&q=80"
-                        alt="Termómetro de alimentos">
+                    <img src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=400&q=80" alt="Termómetro de alimentos">
                 </div>
             </div>
 
@@ -436,40 +474,30 @@
             <div class="accordion-content">
                 <div class="accordion-inner-grid">
                     <div>
-                        <p><strong>Personal:</strong> Uniforme limpio, uñas cortas, cabello recogido. Prohibido fumar o
-                            comer en el área. <span class="tag-red">NO TRABAJAR</span> con diarrea, fiebre o tos.</p>
-                        <p><strong>Lavado de manos:</strong> Mojar, enjabonar, frotar dedos/uñas, enjuagar y secar con
-                            toalla desechable.</p>
-                        <p><strong>Agua e Hielo:</strong> Debe ser potable. El hielo para bebidas nunca se toca con las
-                            manos.</p>
-                        <p><strong>Control de plagas:</strong> Fumigación registrada, cero basura acumulada, evitar
-                            entradas de insectos/roedores.</p>
+                        <p><strong>Personal:</strong> Uniforme limpio, uñas cortas, cabello recogido. Prohibido fumar o comer en el área. <span class="tag-red">NO TRABAJAR</span> con diarrea, fiebre o tos.</p>
+                        <p><strong>Lavado de manos:</strong> Mojar, enjabonar, frotar dedos/uñas, enjuagar y secar con toalla desechable.</p>
+                        <p><strong>Agua e Hielo:</strong> Debe ser potable. El hielo para bebidas nunca se toca con las manos.</p>
+                        <p><strong>Control de plagas:</strong> Fumigación registrada, cero basura acumulada, evitar entradas de insectos/roedores.</p>
                     </div>
-                    <img src=https://papelmatic.com/wp-content/uploads/2025/08/papelmatic-higiene-profesional-tecnicas-higiene-de-manos-portada.jpg
-                        alt="Lavado de manos">
+                    <img src= https://papelmatic.com/wp-content/uploads/2025/08/papelmatic-higiene-profesional-tecnicas-higiene-de-manos-portada.jpg alt="Lavado de manos">
                 </div>
             </div>
 
             <!-- Acordeón 5 -->
-            <button class="accordion-btn" onclick="toggleAccordion(this)">🏆 Certificación: Distintivo H (SECTUR /
-                Puebla)</button>
+            <button class="accordion-btn" onclick="toggleAccordion(this)">🏆 Certificación: Distintivo H (SECTUR / Puebla)</button>
             <div class="accordion-content">
                 <div class="accordion-inner-grid">
                     <div>
-                        <p>Otorgado por la SECTUR. Toma la NOM-251 y la eleva a estándares más estrictos y de
-                            excelencia.</p>
+                        <p>Otorgado por la SECTUR. Toma la NOM-251 y la eleva a estándares más estrictos y de excelencia.</p>
                         <p><strong>Ventajas de obtenerlo:</strong></p>
                         <ul>
                             <li><span class="tag-green">Salud:</span> Reduce intoxicaciones y brotes.</li>
-                            <li><span class="tag-green">Imagen:</span> Incrementa competitividad y confianza del
-                                cliente.</li>
+                            <li><span class="tag-green">Imagen:</span> Incrementa competitividad y confianza del cliente.</li>
                             <li><span class="tag-green">Ahorro:</span> Reduce mermas, productos caducados y quejas.</li>
-                            <li><span class="tag-green">Auditorías:</span> Facilita las inspecciones sanitarias al tener
-                                controles documentados.</li>
+                            <li><span class="tag-green">Auditorías:</span> Facilita las inspecciones sanitarias al tener controles documentados.</li>
                         </ul>
                     </div>
-                    <img src=https://cetogenialife.net/wp-content/uploads/detallado-sello-calidad-alimentos.webp
-                        alt="Restaurante certificado de alta calidad">
+                    <img src= https://cetogenialife.net/wp-content/uploads/detallado-sello-calidad-alimentos.webp alt="Restaurante certificado de alta calidad">
                 </div>
             </div>
 
@@ -510,5 +538,4 @@
         }
     </script>
 </body>
-
 </html>

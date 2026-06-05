@@ -13,6 +13,7 @@
             --text-light: #555;
             --white: #ffffff;
             --border-radius: 8px;
+            --accent: #5e6b52;
         }
 
         * {
@@ -24,19 +25,22 @@
 
         body {
             display: flex;
-            height: 100vh;
+            min-height: 100vh;
             background-color: var(--main-bg);
             color: var(--text-dark);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         /* --- Sidebar (Panel) --- */
         .sidebar {
-            width: 250px;
+            width: 260px;
             background-color: var(--sidebar-bg);
-            padding: 20px;
+            padding: 28px 22px;
             display: flex;
             flex-direction: column;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            box-shadow: 2px 0 20px rgba(0,0,0,0.08);
+            z-index: 10;
         }
 
         .sidebar h2 {
@@ -70,34 +74,44 @@
         /* --- Main Content --- */
         .main-content {
             flex: 1;
-            padding: 40px;
+            padding: 42px 48px 60px;
             overflow-y: auto;
+            max-width: 1280px;
+            margin: 0 auto;
         }
 
         .header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 28px;
         }
 
         .header-title h1 {
-            font-size: 2rem;
+            font-size: 2.25rem;
+            letter-spacing: -0.03em;
             color: var(--text-dark);
-            margin-bottom: 5px;
+            margin-bottom: 10px;
+            line-height: 1.1;
         }
 
         .header-title p {
             color: var(--text-light);
+            max-width: 620px;
+            line-height: 1.8;
+            margin: 0;
         }
 
         .admin-badge {
             background-color: var(--white);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            font-size: 0.9rem;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-weight: 700;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+            font-size: 0.95rem;
+            color: var(--sidebar-bg);
+            border: 1px solid rgba(90, 130, 255, 0.16);
         }
 
         /* --- Sections Visibility --- */
@@ -118,41 +132,78 @@
         /* --- Cards and Layout --- */
         .grid-2-col {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
         }
 
         .card {
-            background-color: rgba(255, 255, 255, 0.6);
-            padding: 25px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.88);
+            padding: 28px;
+            border-radius: calc(var(--border-radius) + 4px);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+            border: 1px solid rgba(136, 152, 255, 0.12);
         }
 
         .card h3 {
-            margin-bottom: 15px;
-            border-bottom: 2px solid var(--sidebar-bg);
-            padding-bottom: 5px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid rgba(75, 103, 255, 0.25);
+            padding-bottom: 8px;
             display: inline-block;
+            font-size: 1.15rem;
+            letter-spacing: -0.02em;
         }
 
-        .card h4 {
-            color: #3b462c;
-            margin-bottom: 10px;
-            margin-top: 15px;
+        .content-section h2,
+        .content-section h3 {
+            color: #22304f;
+            line-height: 1.25;
+            margin-bottom: 0.75rem;
         }
 
-        ul { margin-left: 20px; line-height: 1.6; margin-bottom: 10px;}
-        
+        .section-intro p {
+            color: #505d79;
+            line-height: 1.8;
+            max-width: 820px;
+            margin-bottom: 20px;
+        }
+
+        .card p,
+        .card li,
+        .card strong,
+        .content-section p {
+            line-height: 1.75;
+            color: #424a5d;
+        }
+
+        .card p { margin-bottom: 1rem; }
+
+        ul {
+            margin-left: 1.2rem;
+            line-height: 1.75;
+            margin-bottom: 16px;
+            color: #4f5a72;
+        }
+
+        .card ul {
+            margin-left: 1.2rem;
+        }
+
         .review {
-            background: var(--white);
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
+            background: #f8f9ff;
+            padding: 16px 18px;
+            border-radius: 14px;
+            margin-bottom: 14px;
+            border: 1px solid rgba(100, 123, 255, 0.12);
         }
         
-        .stars { color: #b8860b; font-weight: bold; }
+        .review p {
+            margin: 0;
+            color: #4e5770;
+            line-height: 1.8;
+        }
+        
+        .stars { color: #b8860b; font-weight: 700; letter-spacing: 0.03em; }
 
         /* --- Map Placeholder --- */
         .map-container {
@@ -168,8 +219,95 @@
             font-weight: bold;
         }
 
-        a { color: #2a3143; font-weight: bold; }
-        a:hover { color: #555; }
+        /* --- Accordion (Interactividad) --- */
+        .accordion-btn {
+            background-color: var(--white);
+            color: var(--text-dark);
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: var(--border-radius);
+            transition: 0.3s;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .accordion-btn.active, .accordion-btn:hover {
+            background-color: rgba(74, 109, 255, 0.15);
+        }
+
+        .accordion-btn::after {
+            content: '\25BC'; /* Flecha abajo */
+            font-size: 0.9rem;
+            color: var(--accent);
+            transition: transform 0.25s ease;
+        }
+
+        .accordion-btn.active::after {
+            transform: rotate(-180deg);
+        }
+
+        .accordion-content {
+            padding: 0 20px;
+            background-color: rgba(255, 255, 255, 0.5);
+            display: none;
+            overflow: hidden;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            margin-top: -8px;
+            margin-bottom: 15px;
+        }
+
+        .accordion-inner-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            padding: 20px 0;
+            align-items: center;
+        }
+
+        .accordion-inner-grid img {
+            width: 100%;
+            border-radius: var(--border-radius);
+            object-fit: cover;
+            height: 200px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .tag-green { color: #2d5a27; font-weight: bold; }
+        .tag-red { color: #a12a2a; font-weight: bold; }
+
+        @media (max-width: 980px) {
+            .grid-2-col,
+            .accordion-inner-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-content {
+                padding: 28px 24px 45px;
+            }
+        }
+
+        @media (max-width: 680px) {
+            .sidebar {
+                display: none;
+            }
+
+            body {
+                display: block;
+            }
+
+            .main-content {
+                padding: 24px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -178,9 +316,6 @@
     <aside class="sidebar">
         <h2>Panel</h2>
         <button class="nav-btn active" onclick="showSection('resumen', this)">📊 Resumen General</button>
-        <button class="nav-btn" onclick="showSection('negocios', this)">🏪 Mi Local (Negocios)</button>
-        <button class="nav-btn" onclick="showSection('clientes', this)">🗺️ Mapa de Clientes</button>
-        <button class="nav-btn" onclick="showSection('normativas', this)">📋 Normativas y Plagas</button>
     </aside>
 
     <!-- Contenido Principal -->
@@ -188,55 +323,89 @@
         
         <div class="header">
             <div class="header-title">
-                <h1 id="page-title">Resumen General</h1>
-                <p id="page-subtitle">Información general sobre procedimientos, sanidad y certificaciones.</p>
-            </div>
-            <div class="admin-badge">
-                👤 Admin
+                <h1 id="page-title">Higiene</h1>
+                <p id="page-subtitle">Información para una buena higiene.</p>
             </div>
         </div>
 
-        <!-- SECCIÓN 1: RESUMEN GENERAL -->
+        <!-- SECCIÓN 1: RESUMEN GENERAL (Minimizada para dar protagonismo a NOMs en esta demo) -->
         <section id="resumen" class="content-section active">
+            <div class="section-intro">
+                <p>Información clave y recomendaciones para mantener tu local seguro, limpio y alineado con los requisitos sanitarios.</p>
+            </div>
             <div class="card">
-                <h3>Comunidad Limpia y Cultura Antiplagas</h3>
-                <p>La seguridad alimentaria, la sanidad de la zona y la prevención de fauna nociva son una responsabilidad compartida. Contribuir a una cultura antiplagas requiere del esfuerzo de todos:</p>
-                <div class="grid-2-col">
+                <h3>Comunidad Limpia y Antiplagas</h3>
+                <p>La seguridad alimentaria y prevención de plagas es tarea de todos.</p>
+                <div class="grid-2-col" style="margin-top: 15px;">
                     <div>
-                        <h4>Recomendaciones para Comerciantes</h4>
+                        <strong>🏪 Comerciantes:</strong>
                         <ul>
-                            <li><strong>Gestión de residuos:</strong> Asegurar el manejo correcto de la basura en contenedores herméticos y retirarla diariamente para evitar focos de infección.</li>
-                            <li><strong>Higiene estricta:</strong> Implementar protocolos de limpieza profunda al cierre de cada turno, evitando acumulación de grasa o agua estancada.</li>
-                            <li><strong>Prevención física:</strong> Mantener selladas grietas, instalar mosquiteros y contratar servicios de fumigación preventiva y certificada periódicamente.</li>
+                            <li>Basura en contenedores herméticos.</li>
+                            <li>Limpieza profunda diaria sin agua estancada.</li>
+                            <li>Fumigación preventiva certificada.</li>
                         </ul>
                     </div>
                     <div>
-                        <h4>Recomendaciones para Consumidores</h4>
+                        <strong>👥 Consumidores:</strong>
                         <ul>
-                            <li><strong>Responsabilidad cívica:</strong> Depositar los desechos exclusivamente en los basureros asignados, evitando dejar basura en calles que pueda atraer roedores o insectos.</li>
-                            <li><strong>Cuidado del entorno:</strong> Evitar alimentar a la fauna callejera en las cercanías de los restaurantes, ya que esto propicia la aparición de plagas secundarias.</li>
-                            <li><strong>Participación activa:</strong> Exigir limpieza en los locales y reportar prácticas insalubres a la administración o autoridades correspondientes.</li>
+                            <li>Depositar basura solo en lugares asignados.</li>
+                            <li>No alimentar fauna callejera cerca de locales.</li>
+                            <li>Exigir higiene y reportar malas prácticas.</li>
                         </ul>
                     </div>
                 </div>
             </div>
-
-            <div class="card">
-                <h3>Procedimiento para obtener la certificación de alimentos (COFEPRIS)</h3>
-                <p>Para avalar las buenas prácticas de higiene y exportación, la Comisión Federal para la Protección contra Riesgos Sanitarios (COFEPRIS) establece un procedimiento oficial. Los pasos generales incluyen:</p>
-                
-                <ul>
-                    <li><strong>1. Autoevaluación previa:</strong> Es recomendable que el establecimiento aplique la guía de autoevaluación oficial, la cual se basa en verificar el cumplimiento de la Norma Oficial Mexicana NOM-251-SSA1-2009. Se aconseja obtener una calificación igual o mayor al 85% de cumplimiento antes de solicitar el trámite.</li>
-                    <li><strong>2. Documentación en regla:</strong> El local debe asegurarse de que su aviso de funcionamiento esté actualizado y que los productos coincidan con los de la solicitud.</li>
-                    <li><strong>3. Solicitud y Pago:</strong> Se debe presentar la solicitud (por ejemplo, el formato COFEPRIS-01-020 para visita de verificación) e incluir el comprobante original de pago de derechos. El trámite y pago pueden gestionarse en línea a través de la plataforma DIGIPRIS o físicamente en el Centro Integral de Servicios (CIS).</li>
-                    <li><strong>4. Visita de Verificación:</strong> Personal de la COFEPRIS realiza una visita al establecimiento para evaluar el grado de cumplimiento de la legislación sanitaria aplicable.</li>
-                    <li><strong>5. Dictamen y Certificado:</strong> Si la empresa cumple con las disposiciones, se emite un dictamen de cumplimiento. Una vez que el dictamen indica "PROCEDE", el establecimiento puede obtener certificados como el de Conformidad de Buenas Prácticas Sanitarias (COFEPRIS-01-007-C).</li>
-                </ul>
-
-                <br>
-                <p><strong>Fuentes y Enlaces Oficiales (Gobierno de México):</strong></p>
-                <ul>
-                    <li><a href="https://www.gob.mx/cofepris/acciones-y-programas/procedimiento-para-obtener-la-certificacion-de-alimentos" target="_blank">Procedimiento para obtener la certificación de alimentos | Comisión Federal para la Protección contra Riesgos Sanitarios | Gobierno | gob.mx</a></li>
-                    <li><a href="https://www.gob.mx/cofepris/acciones-y-programas/certificacion-de-alimentos-76095" target="_blank">Certificación de alimentos | Comisión Federal para la Protección contra Riesgos Sanitarios | Gobierno | gob.mx</a></li>
-                </ul>
+            
+            <button class="accordion-btn" onclick="toggleAccordion(this)">📄 Proceso para Certificación COFEPRIS</button>
+            <div class="accordion-content">
+                <div class="accordion-inner-grid">
+                    <div>
+                        <ul>
+                            <li><strong>1. Autoevaluación:</strong> Cumplir mínimo 85% de la NOM-251.</li>
+                            <li><strong>2. Documentación:</strong> Aviso de funcionamiento vigente.</li>
+                            <li><strong>3. Solicitud:</strong> Formato COFEPRIS-01-020 y pago en DIGIPRIS o CIS.</li>
+                            <li><strong>4. Verificación:</strong> Visita de inspectores sanitarios.</li>
+                            <li><strong>5. Dictamen:</strong> Si "PROCEDE", se otorga el certificado oficial.</li>
+                        </ul>
+                    </div>
+                    <img src= https://thefoodtech.com/wp-content/uploads/2022/11/comer-y-beber-inocuidad-1-828x548.jpg alt="Inspección de calidad">
+                </div>
             </div>
+        </section>
+
+    </main>
+
+    <!-- Script para navegación y acordeones -->
+    <script>
+        // Navegación entre pantallas
+        const titles = {
+            'resumen': { title: 'Resumen General', subtitle: 'Información clave y rápida del fraccionamiento.' },
+            'negocios': { title: 'Mi Local', subtitle: 'Gestiona tus certificaciones e historial.' },
+            'clientes': { title: 'Mapa Interactivo', subtitle: 'Visualiza a tus clientes.' },
+            'normativas': { title: 'NOMs y Certificaciones', subtitle: 'Haz clic en los temas para expandir la información.' }
+        };
+
+        function showSection(sectionId, element) {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+
+            document.getElementById('page-title').innerText = titles[sectionId].title;
+            document.getElementById('page-subtitle').innerText = titles[sectionId].subtitle;
+        }
+
+        // Lógica de Acordeones
+        function toggleAccordion(element) {
+            element.classList.toggle("active");
+            let content = element.nextElementSibling;
+            if (content.style.display === "block") {
+                content.style.display = "none";
+            } else {
+                content.style.display = "block";
+            }
+        }
+    </script>
+</body>
+</html>
