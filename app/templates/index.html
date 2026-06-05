@@ -8,46 +8,38 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        body { font-family: 'Inter', system-ui, sans-serif; background-color: #f8fafc; }
-        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
-    </style>
+    <link rel="stylesheet" href="../static/main.css">
 </head>
-<body class="bg-slate-50 text-slate-800">
 
-    <div class="min-h-screen flex flex-col md:flex-row">
-        <aside class="w-full md:w-64 bg-slate-900 text-slate-100 p-5 md:p-6">
+<body>
+
+    <div class="page-shell">
+        <aside class="sidebar">
             <div class="mb-6">
-                <h2 class="text-lg font-semibold tracking-wide">Panel</h2>
-                <p class="text-slate-400 text-sm mt-1">Fraccionamiento</p>
+                <h2 class="sidebar-heading">Panel</h2>
             </div>
-            <nav class="space-y-2">
-                <a href="#" data-section="resumen" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-white font-medium">
-                    <i class="fa-solid fa-chart-line w-5"></i>
+            <nav class="nav">
+                <a href="#" data-section="resumen" class="nav-link nav-link--active">
+                    <i class="fa-solid fa-chart-line nav-link__icon"></i>
                     <span>Resumen</span>
                 </a>
-                <a href="#" data-section="residentes" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition">
-                    <i class="fa-solid fa-users w-5"></i>
-                    <span>Residentes</span>
-                </a>
-                <a href="#" data-section="reportes-bimestrales" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition">
-                    <i class="fa-solid fa-calendar-days w-5"></i>
-                    <span>Reportes bimestrales</span>
+                <a href="#" data-section="Empleados" class="nav-link nav-link--default">
+                    <i class="fa-solid fa-users nav-link__icon"></i>
+                    <span>Empleados</span>
                 </a>
             </nav>
         </aside>
 
-        <main class="flex-1 p-4 md:p-8">
-    <div class="max-w-7xl mx-auto">
+        <main class="page-main">
+    <div class="page-container">
         <section id="resumen-section" class="content-section">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div class="page-header">
             <div>
-                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Resumen General</h1>
-                <p class="text-slate-500 mt-1">Monitorea el consumo, cobranza y adeudos del fraccionamiento.</p>
+                <h1 class="page-title">Resumen General</h1>
+                <p class="page-description">Monitorea el consumo, cobranza y adeudos del fraccionamiento.</p>
             </div>
             <div class="flex gap-3 flex-wrap">
-                <span class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm">
+                <span class="admin-badge">
                     <i class="fa-solid fa-user"></i>
                     <p>Admin</p>
                 </span>
