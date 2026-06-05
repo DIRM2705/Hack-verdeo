@@ -134,15 +134,7 @@
           class="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 transition"
           oninput="filterTable()"/>
       </div>
-      <select id="dept-filter" onchange="filterTable()"
-        class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 transition">
-        <option value="">Todos los departamentos</option>
-        <option>Ingeniería</option>
-        <option>Diseño</option>
-        <option>Ventas</option>
-        <option>Recursos Humanos</option>
-        <option>Operaciones</option>
-      </select>
+      <!-- Removed departamento filter as requested -->
     </div>
 
     <!-- Tabla de empleados -->
@@ -151,9 +143,7 @@
         <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wide">
           <tr>
             <th class="text-left px-5 py-3 font-semibold">Empleado</th>
-            <th class="text-left px-5 py-3 font-semibold hidden sm:table-cell">Departamento</th>
-            <th class="text-left px-5 py-3 font-semibold hidden md:table-cell">Badges</th>
-            <th class="text-left px-5 py-3 font-semibold">Estatus</th>
+              <th class="text-left px-5 py-3 font-semibold hidden md:table-cell">Badges</th>
             <th class="px-5 py-3"></th>
           </tr>
         </thead>
@@ -299,12 +289,8 @@ const AVATAR_COLORS = [
 /* ═══════════════════════════════════════════
    ESTADO
 ═══════════════════════════════════════════ */
-let employees = [
-  { nombre:'Ana', apellido:'López',    correo:'ana@empresa.com',    dept:'Diseño',           estatus:'Activo',   badges:['diseño','mentor'] },
-  { nombre:'Carlos', apellido:'Ruiz',  correo:'carlos@empresa.com', dept:'Ingeniería',       estatus:'Activo',   badges:['fullstack','cloud','agile'] },
-  { nombre:'María', apellido:'Torres', correo:'maria@empresa.com',  dept:'Recursos Humanos', estatus:'Licencia', badges:['lider'] },
-  { nombre:'Jorge', apellido:'Méndez', correo:'jorge@empresa.com',  dept:'Ventas',           estatus:'Activo',   badges:['ventas','innovador'] },
-];
+// Inicializa la lista de empleados con los datos proporcionados por el servidor
+let employees = {{ empleados|tojson }};
 
 let modalBadges = []; // badges temporales en el form
 
@@ -328,14 +314,13 @@ function initBadgeSelect() {
 
 function renderTable() {
   const q    = document.getElementById('search-input').value.toLowerCase();
-  const dept = document.getElementById('dept-filter').value;
   const tbody = document.getElementById('employees-tbody');
   const empty = document.getElementById('empty-state');
   const countLbl = document.getElementById('count-label');
 
   const filtered = employees.filter((e,i) => {
     const full = `${e.nombre} ${e.apellido} ${e.correo}`.toLowerCase();
-    return (!q || full.includes(q)) && (!dept || e.dept === dept);
+    return (!q || full.includes(q));
   });
 
   tbody.innerHTML = '';
@@ -351,8 +336,6 @@ function renderTable() {
     const origIdx = employees.indexOf(e);
     const initials = (e.nombre[0]||'') + (e.apellido[0]||'');
     const avatarCls = avatarColor(e.nombre);
-    const statusCls = STATUS_STYLES[e.estatus] || STATUS_STYLES['Inactivo'];
-
     const badgesHtml = (e.badges||[]).slice(0,3).map(id => {
       const b = getBadge(id); if(!b) return '';
       return `<span class="badge-pill ${b.color}"><i class="fa-solid ${b.icon} text-xs"></i>${b.label}</span>`;
@@ -371,12 +354,8 @@ function renderTable() {
           </div>
         </div>
       </td>
-      <td class="px-5 py-3.5 hidden sm:table-cell text-slate-600">${e.dept || '—'}</td>
       <td class="px-5 py-3.5 hidden md:table-cell">
         <div class="flex flex-wrap gap-1.5">${badgesHtml || '<span class="text-slate-300 text-xs">Sin badges</span>'}</div>
-      </td>
-      <td class="px-5 py-3.5">
-        <span class="badge-pill ${statusCls}">${e.estatus}</span>
       </td>
       <td class="px-5 py-3.5 text-right">
         <div class="flex items-center justify-end gap-1">

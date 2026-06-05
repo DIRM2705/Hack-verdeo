@@ -62,3 +62,22 @@ def reseñas(uuid_empresa):
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
+
+
+@app.route('/empleados/<uuid_empresa>')
+def empleados_page(uuid_empresa):
+    """Renderiza la plantilla de empleados usando los datos obtenidos desde la BD."""
+    with Session(db) as session:
+        stm = select(Empleado.uuid, Empleado.nombre, Empleado.apellidos, Empleado.correo, Badge.icono_url).join(Badge, Empleado.badge_uuid == Badge.uuid).where(Empleado.uuid_empresa == uuid_empresa)
+        rows = session.execute(stm).all()
+        empleados_list = []
+        for r in rows:
+            empleados_list.append({
+                'uuid': r[0],
+                'nombre': r[1],
+                'apellido': r[2],
+                'correo': r[3] if len(r) > 3 else '',
+                'icono_url': r[4] if len(r) > 4 else None,
+                'badges': []
+            })
+    return render_template('empleados.html', empleados=empleados_list)
