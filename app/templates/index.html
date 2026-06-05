@@ -3,191 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="empresa-uuid" content="{{ empresa_uuid }}">
-    <title>Panel de Administración - Locales</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Panel de Administración - Fraccionamiento / Locales</title>
     <style>
-        /* Estilos adicionales */
-        .stars {
-            color: #fbbf24;
+        :root {
+            --sidebar-bg: #7b8b6f;
+            --main-bg: #d0c4c0;
+            --btn-active: #d6cdc8;
+            --text-dark: #2a3143;
+            --text-light: #555;
+            --white: #ffffff;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: var(--main-bg);
+            color: var(--text-dark);
+        }
+
+        /* --- Sidebar (Panel) --- */
+        .sidebar {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .sidebar h2 {
+            color: #2a3143;
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            text-align: left;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
             font-size: 1rem;
-            letter-spacing: 2px;
+            color: #2a3143;
+            border-radius: var(--border-radius);
+            transition: background 0.3s;
+            font-weight: 500;
         }
-        
-        .review {
-            border-bottom: 1px solid #e2e8f0;
-            padding: 0.75rem 0;
+
+        .nav-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
         }
-        
-        .review:last-child {
-            border-bottom: none;
+
+        .nav-btn.active {
+            background-color: var(--btn-active);
         }
-        
-        .loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 1rem;
-            color: #64748b;
+
+        /* --- Main Content --- */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
         }
-        
-        .loading i {
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .rating-average {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        
-        .rating-number {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #0f172a;
-        }
-        
-        .review-count {
-            font-size: 0.75rem;
-            color: #64748b;
-        }
-        
-        .cert-list {
-            margin-top: 0.5rem;
-        }
-        
-        .cert-item {
+
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 30px;
         }
-        
-        .cert-name {
-            font-weight: 500;
-            color: #0f172a;
+
+        .header-title h1 {
+            font-size: 2rem;
+            color: var(--text-dark);
+            margin-bottom: 5px;
         }
-        
-        .cert-expiry {
-            font-size: 0.7rem;
-            color: #ef4444;
+
+        .header-title p {
+            color: var(--text-light);
         }
-        
-        .cert-expiry.valid {
-            color: #10b981;
+
+        .admin-badge {
+            background-color: var(--white);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 0.9rem;
         }
-        
-        .text-error {
-            color: #dc2626;
-            font-size: 0.875rem;
+
+        /* --- Sections Visibility --- */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
         }
-        
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Cards and Layout --- */
         .grid-2-col {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
-        
+
         .card {
-            background: white;
-            border-radius: 0.75rem;
-            padding: 1.25rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid #e2e8f0;
+            background-color: rgba(255, 255, 255, 0.6);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
         }
-        
+
         .card h3 {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: #0f172a;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--sidebar-bg);
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+
+        .card h4 {
+            color: #3b462c;
+            margin-bottom: 10px;
+            margin-top: 15px;
+        }
+
+        ul { margin-left: 20px; line-height: 1.6; margin-bottom: 10px;}
+        
+        .review {
+            background: var(--white);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
         }
         
-        @media (max-width: 768px) {
-            .grid-2-col {
-                grid-template-columns: 1fr;
-            }
+        .stars { color: #b8860b; font-weight: bold; }
+
+        /* --- Map Placeholder --- */
+        .map-container {
+            width: 100%;
+            height: 400px;
+            background-color: #e5e5e5;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #999;
+            color: #666;
+            font-weight: bold;
         }
+
+        a { color: #2a3143; font-weight: bold; }
+        a:hover { color: #555; }
     </style>
 </head>
 <body>
 
+    <!-- Panel Lateral -->
     <aside class="sidebar">
         <h2>Panel</h2>
-        <button class="nav-btn active" onclick="window.location.href='{{ url_for('dashboard') }}'">🏪 Mi Local</button>
-        <button class="nav-btn" onclick="window.location.href='{{ url_for('empleados_page', uuid_empresa=empresa_uuid) }}'">👥 Empleados</button>
+        <button class="nav-btn active" onclick="showSection('resumen', this)">📊 Resumen General</button>
+        <button class="nav-btn" onclick="showSection('negocios', this)">🏪 Mi Local (Negocios)</button>
+        <button class="nav-btn" onclick="showSection('clientes', this)">🗺️ Mapa de Clientes</button>
         <button class="nav-btn" onclick="showSection('normativas', this)">📋 Normativas y Plagas</button>
     </aside>
 
+    <!-- Contenido Principal -->
     <main class="main-content">
+        
         <div class="header">
-            <section id="negocios" class="content-section active">
-                <div class="grid-2-col">
-                    <div class="card">
-                        <h3>Perfil del Local</h3>
-                        <p><strong>Nombre:</strong> La Piazza Restaurante</p>
-                        <p><strong>Giro:</strong> Alimentos y Bebidas</p>
-                        <br>
-                        <h3>Estado de Certificaciones</h3>
-                        <div id="certificaciones-container">
-                            <div id="certificaciones-loading" class="loading">
-                                <i class="fa-solid fa-spinner"></i> Cargando certificaciones...
-                            </div>
-                            <div id="certificaciones-list" class="cert-list"></div>
-                            <p id="cert-error" class="text-error" style="display:none;"></p>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <h3>Opiniones y Calificaciones</h3>
-                        <div id="reseñas-container">
-                            <div id="reseñas-loading" class="loading">
-                                <i class="fa-solid fa-spinner"></i> Cargando reseñas...
-                            </div>
-                            <div id="reseñas-list"></div>
-                            <p id="reseñas-error" class="text-error" style="display:none;"></p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="normativas" class="content-section">
-                <div class="grid-2-col">
-                    <div class="card">
-                        <h3>Normativas Oficiales (NOMs)</h3>
-                        <p>Conoce las reglas que todo restaurante debe seguir:</p>
-                        <ul>
-                            <li><strong>NOM-251-SSA1-2009:</strong> Prácticas de higiene para el proceso de alimentos, bebidas o suplementos alimenticios.</li>
-                            <li><strong>NOM-093-SSA1-1994:</strong> Prácticas de higiene y sanidad en la preparación de alimentos que se ofrecen en establecimientos fijos.</li>
-                        </ul>
-                    </div>
-                    <div class="card">
-                        <h3>Control y Riesgo de Plagas</h3>
-                        <p><strong>Riesgos principales:</strong> Contaminación cruzada, cierre temporal por autoridades sanitarias, pérdida de reputación.</p>
-                        <br>
-                        <h3>Cuidados Diarios:</h3>
-                        <ul>
-                            <li>Sellar grietas y huecos en paredes y zócalos.</li>
-                            <li>Mantener la basura en contenedores herméticos y vaciar al final del turno.</li>
-                            <li>Limpiar profundamente áreas de almacenamiento y evitar cartón corrugado.</li>
-                            <li>Evitar el estancamiento de agua en tarjas y pisos.</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
+            <div class="header-title">
+                <h1 id="page-title">Resumen General</h1>
+                <p id="page-subtitle">Información general sobre procedimientos, sanidad y certificaciones.</p>
+            </div>
+            <div class="admin-badge">
+                👤 Admin
+            </div>
         </div>
-    </main>
 
-    <script src="{{ url_for('static', filename='main.js') }}"></script>
-</body>
-</html>
+        <!-- SECCIÓN 1: RESUMEN GENERAL -->
+        <section id="resumen" class="content-section active">
+            <div class="card">
+                <h3>Comunidad Limpia y Cultura Antiplagas</h3>
+                <p>La seguridad alimentaria, la sanidad de la zona y la prevención de fauna nociva son una responsabilidad compartida. Contribuir a una cultura antiplagas requiere del esfuerzo de todos:</p>
+                <div class="grid-2-col">
+                    <div>
+                        <h4>Recomendaciones para Comerciantes</h4>
+                        <ul>
+                            <li><strong>Gestión de residuos:</strong> Asegurar el manejo correcto de la basura en contenedores herméticos y retirarla diariamente para evitar focos de infección.</li>
+                            <li><strong>Higiene estricta:</strong> Implementar protocolos de limpieza profunda al cierre de cada turno, evitando acumulación de grasa o agua estancada.</li>
+                            <li><strong>Prevención física:</strong> Mantener selladas grietas, instalar mosquiteros y contratar servicios de fumigación preventiva y certificada periódicamente.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Recomendaciones para Consumidores</h4>
+                        <ul>
+                            <li><strong>Responsabilidad cívica:</strong> Depositar los desechos exclusivamente en los basureros asignados, evitando dejar basura en calles que pueda atraer roedores o insectos.</li>
+                            <li><strong>Cuidado del entorno:</strong> Evitar alimentar a la fauna callejera en las cercanías de los restaurantes, ya que esto propicia la aparición de plagas secundarias.</li>
+                            <li><strong>Participación activa:</strong> Exigir limpieza en los locales y reportar prácticas insalubres a la administración o autoridades correspondientes.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Procedimiento para obtener la certificación de alimentos (COFEPRIS)</h3>
+                <p>Para avalar las buenas prácticas de higiene y exportación, la Comisión Federal para la Protección contra Riesgos Sanitarios (COFEPRIS) establece un procedimiento oficial. Los pasos generales incluyen:</p>
+                
+                <ul>
+                    <li><strong>1. Autoevaluación previa:</strong> Es recomendable que el establecimiento aplique la guía de autoevaluación oficial, la cual se basa en verificar el cumplimiento de la Norma Oficial Mexicana NOM-251-SSA1-2009. Se aconseja obtener una calificación igual o mayor al 85% de cumplimiento antes de solicitar el trámite.</li>
+                    <li><strong>2. Documentación en regla:</strong> El local debe asegurarse de que su aviso de funcionamiento esté actualizado y que los productos coincidan con los de la solicitud.</li>
+                    <li><strong>3. Solicitud y Pago:</strong> Se debe presentar la solicitud (por ejemplo, el formato COFEPRIS-01-020 para visita de verificación) e incluir el comprobante original de pago de derechos. El trámite y pago pueden gestionarse en línea a través de la plataforma DIGIPRIS o físicamente en el Centro Integral de Servicios (CIS).</li>
+                    <li><strong>4. Visita de Verificación:</strong> Personal de la COFEPRIS realiza una visita al establecimiento para evaluar el grado de cumplimiento de la legislación sanitaria aplicable.</li>
+                    <li><strong>5. Dictamen y Certificado:</strong> Si la empresa cumple con las disposiciones, se emite un dictamen de cumplimiento. Una vez que el dictamen indica "PROCEDE", el establecimiento puede obtener certificados como el de Conformidad de Buenas Prácticas Sanitarias (COFEPRIS-01-007-C).</li>
+                </ul>
+
+                <br>
+                <p><strong>Fuentes y Enlaces Oficiales (Gobierno de México):</strong></p>
+                <ul>
+                    <li><a href="https://www.gob.mx/cofepris/acciones-y-programas/procedimiento-para-obtener-la-certificacion-de-alimentos" target="_blank">Procedimiento para obtener la certificación de alimentos | Comisión Federal para la Protección contra Riesgos Sanitarios | Gobierno | gob.mx</a></li>
+                    <li><a href="https://www.gob.mx/cofepris/acciones-y-programas/certificacion-de-alimentos-76095" target="_blank">Certificación de alimentos | Comisión Federal para la Protección contra Riesgos Sanitarios | Gobierno | gob.mx</a></li>
+                </ul>
+            </div>

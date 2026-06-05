@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="empresa-uuid" content="{{ empresa_uuid }}">
+    <title>Empleados - Panel de Administración</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Estilos adicionales para el módulo de empleados */
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border: 1px solid;
+        }
+        
+        .badge-pill button {
+            line-height: 1;
+            background: none;
+            border: none;
+            cursor: pointer;
+            opacity: 0.6;
+            margin-left: 4px;
+        }
+        
+        .badge-pill button:hover {
+            opacity: 1;
+        }
+        
+        .avatar {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        .employee-row {
+            transition: background 0.1s;
+            cursor: pointer;
+        }
+        
+        .employee-row:hover {
+            background: #f1f5f9;
+        }
+        
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-row {
+            animation: fadeSlide 0.25s ease both;
+        }
+        
+        /* Modal */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(4px);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        
+        .modal-backdrop.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .modal {
+            background: #fff;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.18);
+            padding: 2rem;
+            transform: translateY(16px) scale(0.97);
+            transition: transform 0.25s;
+        }
+        
+        .modal-backdrop.open .modal {
+            transform: translateY(0) scale(1);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #94a3b8;
+        }
+        
+        .modal-close:hover {
+            color: #475569;
+        }
+        
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 1.25rem;
+            right: 1.25rem;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            font-size: 0.875rem;
+            font-weight: 600;
+            background: #1e293b;
+            color: white;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        /* Acciones de tabla */
+        .table-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.25rem;
+        }
+        
+        .action-btn {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            color: #94a3b8;
+        }
+        
+        .action-btn:hover {
+            background: #f1f5f9;
+        }
+        
+        .action-btn.edit:hover {
+            color: #2563eb;
+        }
+        
+        .action-btn.badge:hover {
+            color: #7c3aed;
+        }
+        
+        .action-btn.delete:hover {
+            background: #fef2f2;
+            color: #e11d48;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 0;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+        
+        .admin-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            padding: 0.375rem 0.875rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <h2>Panel</h2>
+        <button class="nav-btn" onclick="window.location.href='{{ url_for('dashboard', uuid_empresa=empresa_uuid) }}'">🏪 Mi Local</button>
+        <button class="nav-btn" onclick="window.location.href='{{ url_for('empleados_page', uuid_empresa=empresa_uuid) }}'">👥 Empleados</button>
+        <button class="nav-btn active" onclick="window.location.href='{{ url_for('normativas_page', uuid_empresa=empresa_uuid) }}'">📋 Normativas y Plagas</button>
+    </aside>
+
+    <main class="main-content">
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h1 style="font-size: 1.875rem; font-weight: 700; color: #0f172a;">Normativas y Plagas</h1>
+                    <p style="color: #64748b; margin-top: 0.25rem;">Conoce las normativas y plagas aplicables a tu empresa.</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span class="admin-badge"><i class="fa-solid fa-user"></i> Admin</span>
+                </div>
+            </div>
+
+            <p id="count-label" style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.75rem;"></p>
+        </div>
+    </main>
+    <script>        
+    </script>
+</body>
+</html>

@@ -25,12 +25,21 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 Base.metadata.create_all(db)
 
-
 @app.route('/')
-def dashboard():
+def home():
+    return render_template('index.html')
+
+@app.route('/empresa/<uuid_empresa>')
+def dashboard(uuid_empresa: str):
     # ejemplo de UUID de empresa — reemplazar por UUID real según sesión/usuario
     ejemplo_uuid = 'a0c48199a44a4f22be0c43ade5ddd630'
-    return render_template('index.html', empresa_uuid=ejemplo_uuid)
+    return render_template('empresa.html', empresa_uuid=ejemplo_uuid)
+
+
+@app.route('/normativas/<uuid_empresa>')
+def normativas_page(uuid_empresa : str):
+    """Renderiza la plantilla de normativas usando los datos obtenidos desde la BD."""
+    return render_template('normativas.html', empresa_uuid=uuid_empresa)
 
 @app.route('/empleados/<uuid_empresa>')
 def empleados_page(uuid_empresa : str):
@@ -50,6 +59,18 @@ def empleados_page(uuid_empresa : str):
                 'badges': []
             })
     return render_template('empleados.html', empresa_uuid=uuid_empresa, empleados=empleados_list)
+
+@app.route('/api/empresa/<uuid_empresa>')
+def empresa(uuid_empresa : str):
+    with Session(db) as session:
+        uuid_empresa = UUID(uuid_empresa)
+        stm = select(Empresa.nombre).where(Empresa.uuid == uuid_empresa)
+        empresa = session.execute(stm).first()
+        if not empresa:
+            return jsonify({"error": "Empresa no encontrada"}), 404
+        return jsonify({
+            "nombre": empresa[0]
+        })
 
 @app.route('/api/certificaciones/<uuid_empresa>')
 def certificaciones(uuid_empresa : str):

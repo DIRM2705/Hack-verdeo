@@ -23,6 +23,25 @@ async function obtenerReseñas() {
 }
 
 /**
+ * Función para obtener los datos de la empresa desde la API de Flask
+ * @returns {Promise<Object>} Datos de la empresa
+ */
+async function obtenerEmpresa() {
+    try {
+        const response = await fetch(`/api/empresa/${empresaUUID}`);
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('Datos de la empresa recibidos:', data);
+        return data;
+    } catch (error) {
+        console.error('Error al obtener datos de la empresa:', error);
+        throw error;
+    }
+}
+
+/**
  * Función para obtener las certificaciones desde la API de Flask
  * @returns {Promise<Array>} Lista de certificaciones
  */
@@ -97,6 +116,16 @@ function renderStars(rating) {
     return starsHtml;
 }
 
+/**
+ * Función para renderizar el nombre de la empresa en el DOM
+ * @param {Object} empresa - Datos de la empresa
+ */
+function renderEmpresa(empresa) {
+    const nombreElement = document.getElementById('empresa-nombre');
+    if (nombreElement) {
+        nombreElement.innerHTML = `<strong>Nombre:</strong> ${escapeHtml(empresa.nombre)}`;
+    }
+}
 /**
  * Función para renderizar las reseñas en el DOM
  * @param {Array} reseñas - Lista de reseñas
@@ -215,6 +244,20 @@ function escapeHtml(str) {
  * Función principal para cargar todos los datos
  */
 async function cargarDatos() {
+    // Cargar datos de la empresa
+    try {
+        const empresaData = await obtenerEmpresa();
+        if (empresaData) {
+            renderEmpresa(empresaData);
+        }
+    } catch (error) {
+        console.error('Error cargando datos de la empresa:', error);
+        const nombreElement = document.getElementById('empresa-nombre');
+        if (nombreElement) {
+            nombreElement.innerHTML = `<span style="color: #ef4444;">Error al cargar datos de la empresa</span>`;
+        }
+    }
+    
     // Cargar certificaciones
     try {
         const certData = await obtenerCertificaciones();

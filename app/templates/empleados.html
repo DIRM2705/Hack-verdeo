@@ -211,9 +211,9 @@
 <body>
     <aside class="sidebar">
         <h2>Panel</h2>
-        <button class="nav-btn" onclick="window.location.href='{{ url_for('dashboard') }}'">🏪 Mi Local</button>
+        <button class="nav-btn" onclick="window.location.href='{{ url_for('dashboard', uuid_empresa=empresa_uuid) }}'">🏪 Mi Local</button>
         <button class="nav-btn active" onclick="window.location.href='{{ url_for('empleados_page', uuid_empresa=empresa_uuid) }}'">👥 Empleados</button>
-        <button class="nav-btn" onclick="window.location.href='{{ url_for('dashboard') }}#normativas'">📋 Normativas y Plagas</button>
+        <button class="nav-btn" onclick="window.location.href='{{ url_for('normativas_page', uuid_empresa=empresa_uuid) }}#normativas'">📋 Normativas y Plagas</button>
     </aside>
 
     <main class="main-content">
