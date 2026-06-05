@@ -1,87 +1,103 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="empresa-uuid" content="{{ empresa_uuid }}">
     <title>Panel de Administración - Locales</title>
     <link rel="stylesheet" href="../static/main.css">
 </head>
-<body>
 
+<body>
+    <!-- En index.html, actualiza los botones del sidebar: -->
     <aside class="sidebar">
         <h2>Panel</h2>
-        <button class="nav-btn active" onclick="showSection('negocios', this)">🏪 Mi Local</button>
-        <button class="nav-btn" onclick="showSection('clientes', this)">🗺️ Mapa de Clientes</button>
-        <button class="nav-btn" onclick="showSection('normativas', this)">📋 Normativas y Plagas</button>
+        <button class="nav-btn active" onclick="window.location.href='{{ url_for('dashboard') }}'">🏪 Mi Local</button>
+        <button class="nav-btn"
+            onclick="window.location.href='{{ url_for('empleados_page', uuid_empresa=empresa_uuid) }}'">👥
+            Empleados</button>
+        <button class="nav-btn" onclick="window.location.href='{{ url_for('dashboard') }}#normativas'">📋 Normativas y
+            Plagas</button>
     </aside>
 
     <main class="main-content">
         <div class="header">
-        <section id="negocios" class="content-section active">
-            <div class="grid-2-col">
-                <div class="card">
-                    <h3>Perfil del Local</h3>
-                    <p><strong>Nombre:</strong> La Piazza Restaurante</p>
-                    <p><strong>Giro:</strong> Alimentos y Bebidas</p>
-                    <br>
-                    <h3>Estado de Certificaciones</h3>
-                    <ul>
-                        <li><strong>Certificación actual:</strong> Manejo Higiénico de Alimentos (Distintivo H) - <span style="color: green;">Activa</span></li>
-                        <li><strong>Próxima certificación:</strong> 15 de Octubre, 2026</li>
-                        <li><strong>Historial:</strong> Renovando consecutivamente por 3 años (Desde 2023).</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <h3>Opiniones y Calificaciones</h3>
-                    <div class="review">
-                        <span class="stars">★★★★★</span>
-                        <p>"Excelente manejo de la limpieza. Nunca he tenido problemas aquí." - <em>Cliente Anónimo</em></p>
+            <section id="negocios" class="content-section active">
+                <div class="grid-2-col">
+                    <div class="card">
+                        <h3>Perfil del Local</h3>
+                        <p><strong>Nombre:</strong> La Piazza Restaurante</p>
+                        <p><strong>Giro:</strong> Alimentos y Bebidas</p>
+                        <br>
+                        <h3>Estado de Certificaciones</h3>
+                        <div id="certificaciones-container">
+                            <p id="historial-count">Historial: —</p>
+                            <div id="certificaciones-list" class="cert-list"></div>
+                            <p id="cert-error" class="text-error" style="display:none;color:#b91c1c;margin-top:8px;">
+                            </p>
+                        </div>
                     </div>
-                    <div class="review">
-                        <span class="stars">★★★★☆</span>
-                        <p>"Muy buena atención, se nota que siguen los protocolos." - <em>María G.</em></p>
+                    <div class="card">
+                        <h3>Opiniones y Calificaciones</h3>
+                        <div class="review">
+                            <span class="stars">★★★★★</span>
+                            <p>"Excelente manejo de la limpieza. Nunca he tenido problemas aquí." - <em>Cliente
+                                    Anónimo</em></p>
+                        </div>
+                        <div class="review">
+                            <span class="stars">★★★★☆</span>
+                            <p>"Muy buena atención, se nota que siguen los protocolos." - <em>María G.</em></p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section id="clientes" class="content-section">
-            <div class="card">
-                <h3>Ubicación y Cobertura</h3>
-                <p style="margin-bottom: 15px;">Explora el mapa interactivo para visualizar las zonas de entrega y densidad de clientes activos.</p>
-                <div class="map-container">
-                    [ Aquí va el iFrame o el Script del Mapa Interactivo (Ej. Google Maps API) ]
+            <section id="empleados" class="content-section">
+                <div class="card">
+                    <h3>Gestión de Empleados</h3>
+                    <p style="margin-bottom: 15px;">Administra la información y el desempeño de tu equipo de trabajo.
+                    </p>
+                    <div class="employee-list">
+                        <!-- Lista de empleados se llenará dinámicamente -->
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section id="normativas" class="content-section">
-            <div class="grid-2-col">
-                <div class="card">
-                    <h3>Normativas Oficiales (NOMs)</h3>
-                    <p>Conoce las reglas que todo restaurante debe seguir:</p>
-                    <ul>
-                        <li><strong>NOM-251-SSA1-2009:</strong> Prácticas de higiene para el proceso de alimentos, bebidas o suplementos alimenticios.</li>
-                        <li><strong>NOM-093-SSA1-1994:</strong> Prácticas de higiene y sanidad en la preparación de alimentos que se ofrecen en establecimientos fijos.</li>
-                    </ul>
+            <section id="clientes" class="content-section">
+            </section>
+
+            <section id="normativas" class="content-section">
+                <div class="grid-2-col">
+                    <div class="card">
+                        <h3>Normativas Oficiales (NOMs)</h3>
+                        <p>Conoce las reglas que todo restaurante debe seguir:</p>
+                        <ul>
+                            <li><strong>NOM-251-SSA1-2009:</strong> Prácticas de higiene para el proceso de alimentos,
+                                bebidas o suplementos alimenticios.</li>
+                            <li><strong>NOM-093-SSA1-1994:</strong> Prácticas de higiene y sanidad en la preparación de
+                                alimentos que se ofrecen en establecimientos fijos.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>Control y Riesgo de Plagas</h3>
+                        <p><strong>Riesgos principales:</strong> Contaminación cruzada, cierre temporal por autoridades
+                            sanitarias, pérdida de reputación.</p>
+                        <br>
+                        <h3>Cuidados Diarios:</h3>
+                        <ul>
+                            <li>Sellar grietas y huecos en paredes y zócalos.</li>
+                            <li>Mantener la basura en contenedores herméticos y vaciar al final del turno.</li>
+                            <li>Limpiar profundamente áreas de almacenamiento y evitar cartón corrugado.</li>
+                            <li>Evitar el estancamiento de agua en tarjas y pisos.</li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="card">
-                    <h3>Control y Riesgo de Plagas</h3>
-                    <p><strong>Riesgos principales:</strong> Contaminación cruzada, cierre temporal por autoridades sanitarias, pérdida de reputación.</p>
-                    <br>
-                    <h3>Cuidados Diarios:</h3>
-                    <ul>
-                        <li>Sellar grietas y huecos en paredes y zócalos.</li>
-                        <li>Mantener la basura en contenedores herméticos y vaciar al final del turno.</li>
-                        <li>Limpiar profundamente áreas de almacenamiento y evitar cartón corrugado.</li>
-                        <li>Evitar el estancamiento de agua en tarjas y pisos.</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
+            </section>
 
     </main>
 
     <script src="../static/main.js"></script>
 </body>
+
 </html>
