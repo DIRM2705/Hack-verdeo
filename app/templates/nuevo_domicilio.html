@@ -1,0 +1,52 @@
+<div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+        <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Nuevo domicilio</h1>
+        <p class="text-slate-500 mt-1">Registra un nuevo domicilio dentro del fraccionamiento.</p>
+    </div>
+    <div class="flex gap-3 flex-wrap">
+        <a href="{{ url_for('logout') }}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-rose-700 bg-rose-50 hover:bg-rose-100 transition font-medium border border-rose-200">
+            <i class="fa-solid fa-right-from-bracket"></i> Salir
+        </a>
+    </div>
+</div>
+
+<form id="nuevo-domicilio-form" class="bg-white rounded-xl border border-slate-200 p-6 md:p-8 card-shadow space-y-5" action="#" method="post">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label for="numero_lote" class="block text-sm font-medium text-slate-700 mb-2">Numero de lote</label>
+            <input id="numero_lote" name="numero_lote" type="text" placeholder="Ej. A-12" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        </div>
+        <div>
+            <label for="calle" class="block text-sm font-medium text-slate-700 mb-2">Calle</label>
+            <input id="calle" name="calle" type="text" placeholder="Ej. Avenida Principal" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        </div>
+        <div>
+            <label for="numero" class="block text-sm font-medium text-slate-700 mb-2">Numero</label>
+            <input id="numero" name="numero" type="text" placeholder="Ej. 124" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        </div>
+        <div>
+            <label for="titular" class="block text-sm font-medium text-slate-700 mb-2">Titular</label>
+            <input id="titular" name="titular" type="text" placeholder="Nombre del residente" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        </div>
+        <div>
+            <label for="telefono" class="block text-sm font-medium text-slate-700 mb-2">Telefono</label>
+            <input id="telefono" name="telefono" type="tel" placeholder="Ej. 5551234567" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+    </div>
+
+    <div>
+        <label for="notas" class="block text-sm font-medium text-slate-700 mb-2">Notas</label>
+        <textarea id="notas" name="notas" rows="4" placeholder="Observaciones adicionales del domicilio" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+    </div>
+
+    <div id="nuevo-domicilio-feedback" class="hidden rounded-lg border px-4 py-3 text-sm"></div>
+
+    <div class="flex flex-wrap gap-3 pt-2">
+        <button type="submit" class="px-4 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition font-medium">
+            Anadir lote
+        </button>
+        <button type="reset" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 transition font-medium">
+            Limpiar formulario
+        </button>
+    </div>
+</form>

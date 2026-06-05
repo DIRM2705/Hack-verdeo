@@ -1,0 +1,76 @@
+<div class="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+    <div>
+        <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Reportes bimestrales</h1>
+        <p class="text-slate-500 mt-1">Consulta indicadores financieros y de consumo por bimestre.</p>
+    </div>
+
+    <div class="w-full md:w-auto">
+        <div class="flex gap-3 flex-wrap justify-start md:justify-end mb-3">
+            <button class="flex items-center gap-2 px-4 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition font-medium shadow-sm">
+                <i class="fa-solid fa-download"></i> Reporte
+            </button>
+            <a href="{{ url_for('logout') }}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-rose-700 bg-rose-50 hover:bg-rose-100 transition font-medium border border-rose-200">
+                <i class="fa-solid fa-right-from-bracket"></i> Salir
+            </a>
+        </div>
+        <div class="w-full md:w-72">
+            <label for="bimestre-select" class="block text-sm font-medium text-slate-700 mb-2">Periodo activo</label>
+            <select id="bimestre-select" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                {% for period in bimestral_periods %}
+                <option value="{{ period.key }}" {% if period.key == active_bimestral_period %}selected{% endif %}>{{ period.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-xl p-5 border border-slate-100 card-shadow">
+        <p class="text-sm text-slate-500">Ingresos del bimestre</p>
+        <p id="kpi-ingresos-bimestre" class="text-2xl font-bold text-emerald-700 mt-2">$0</p>
+    </div>
+    <div class="bg-white rounded-xl p-5 border border-slate-100 card-shadow">
+        <p class="text-sm text-slate-500">Ingreso acumulado a la fecha</p>
+        <p id="kpi-ingreso-acumulado" class="text-2xl font-bold text-slate-900 mt-2">$0</p>
+    </div>
+    <div class="bg-white rounded-xl p-5 border border-slate-100 card-shadow">
+        <p class="text-sm text-slate-500">Consumo medio de los habitantes</p>
+        <p id="kpi-consumo-medio" class="text-2xl font-bold text-blue-700 mt-2">0 m³</p>
+    </div>
+    <div class="bg-white rounded-xl p-5 border border-slate-100 card-shadow">
+        <p class="text-sm text-slate-500">Consumo total</p>
+        <p id="kpi-consumo-total" class="text-2xl font-bold text-indigo-700 mt-2">0 m³</p>
+    </div>
+    <div class="bg-white rounded-xl p-5 border border-slate-100 card-shadow">
+        <p class="text-sm text-slate-500">Lotes que pagaron</p>
+        <p id="kpi-lotes-pagaron" class="text-2xl font-bold text-emerald-700 mt-2">0</p>
+    </div>
+    <div class="bg-white rounded-xl p-5 border border-slate-100 card-shadow">
+        <p class="text-sm text-slate-500">Lotes al corriente</p>
+        <p id="kpi-lotes-corriente" class="text-2xl font-bold text-slate-900 mt-2">0</p>
+    </div>
+    <div class="bg-white rounded-xl p-5 border border-slate-100 card-shadow md:col-span-2">
+        <p class="text-sm text-slate-500">Potenciales anomalías de consumo</p>
+        <p id="kpi-anomalias-total" class="text-2xl font-bold text-rose-700 mt-2">0</p>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl border border-slate-100 card-shadow overflow-hidden">
+    <div class="px-5 py-4 border-b border-slate-100">
+        <h3 class="text-lg font-semibold text-slate-800">Detalle de anomalías detectadas</h3>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-slate-500">
+                <tr>
+                    <th class="text-left px-5 py-3 font-medium">Lote</th>
+                    <th class="text-left px-5 py-3 font-medium">Variación</th>
+                    <th class="text-left px-5 py-3 font-medium">Estatus</th>
+                </tr>
+            </thead>
+            <tbody id="anomalias-body" class="divide-y divide-slate-100"></tbody>
+        </table>
+    </div>
+</div>
+
+<script id="reportes-bimestrales-data" type="application/json">{{ bimestral_reports | tojson }}</script>
