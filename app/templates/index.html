@@ -1,24 +1,133 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="empresa-uuid" content="{{ empresa_uuid }}">
     <title>Panel de Administración - Locales</title>
-    <link rel="stylesheet" href="../static/main.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Estilos adicionales */
+        .stars {
+            color: #fbbf24;
+            font-size: 1rem;
+            letter-spacing: 2px;
+        }
+        
+        .review {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0.75rem 0;
+        }
+        
+        .review:last-child {
+            border-bottom: none;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            color: #64748b;
+        }
+        
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .rating-average {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .rating-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        
+        .review-count {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        
+        .cert-list {
+            margin-top: 0.5rem;
+        }
+        
+        .cert-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .cert-name {
+            font-weight: 500;
+            color: #0f172a;
+        }
+        
+        .cert-expiry {
+            font-size: 0.7rem;
+            color: #ef4444;
+        }
+        
+        .cert-expiry.valid {
+            color: #10b981;
+        }
+        
+        .text-error {
+            color: #dc2626;
+            font-size: 0.875rem;
+        }
+        
+        .grid-2-col {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .card h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #0f172a;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2-col {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
-
 <body>
-    <!-- En index.html, actualiza los botones del sidebar: -->
+
     <aside class="sidebar">
         <h2>Panel</h2>
         <button class="nav-btn active" onclick="window.location.href='{{ url_for('dashboard') }}'">🏪 Mi Local</button>
-        <button class="nav-btn"
-            onclick="window.location.href='{{ url_for('empleados_page', uuid_empresa=empresa_uuid) }}'">👥
-            Empleados</button>
-        <button class="nav-btn" onclick="window.location.href='{{ url_for('dashboard') }}#normativas'">📋 Normativas y
-            Plagas</button>
+        <button class="nav-btn" onclick="window.location.href='{{ url_for('empleados_page', uuid_empresa=empresa_uuid) }}'">👥 Empleados</button>
+        <button class="nav-btn" onclick="showSection('normativas', this)">📋 Normativas y Plagas</button>
     </aside>
 
     <main class="main-content">
@@ -32,39 +141,24 @@
                         <br>
                         <h3>Estado de Certificaciones</h3>
                         <div id="certificaciones-container">
-                            <p id="historial-count">Historial: —</p>
+                            <div id="certificaciones-loading" class="loading">
+                                <i class="fa-solid fa-spinner"></i> Cargando certificaciones...
+                            </div>
                             <div id="certificaciones-list" class="cert-list"></div>
-                            <p id="cert-error" class="text-error" style="display:none;color:#b91c1c;margin-top:8px;">
-                            </p>
+                            <p id="cert-error" class="text-error" style="display:none;"></p>
                         </div>
                     </div>
                     <div class="card">
                         <h3>Opiniones y Calificaciones</h3>
-                        <div class="review">
-                            <span class="stars">★★★★★</span>
-                            <p>"Excelente manejo de la limpieza. Nunca he tenido problemas aquí." - <em>Cliente
-                                    Anónimo</em></p>
-                        </div>
-                        <div class="review">
-                            <span class="stars">★★★★☆</span>
-                            <p>"Muy buena atención, se nota que siguen los protocolos." - <em>María G.</em></p>
+                        <div id="reseñas-container">
+                            <div id="reseñas-loading" class="loading">
+                                <i class="fa-solid fa-spinner"></i> Cargando reseñas...
+                            </div>
+                            <div id="reseñas-list"></div>
+                            <p id="reseñas-error" class="text-error" style="display:none;"></p>
                         </div>
                     </div>
                 </div>
-            </section>
-
-            <section id="empleados" class="content-section">
-                <div class="card">
-                    <h3>Gestión de Empleados</h3>
-                    <p style="margin-bottom: 15px;">Administra la información y el desempeño de tu equipo de trabajo.
-                    </p>
-                    <div class="employee-list">
-                        <!-- Lista de empleados se llenará dinámicamente -->
-                    </div>
-                </div>
-            </section>
-
-            <section id="clientes" class="content-section">
             </section>
 
             <section id="normativas" class="content-section">
@@ -73,16 +167,13 @@
                         <h3>Normativas Oficiales (NOMs)</h3>
                         <p>Conoce las reglas que todo restaurante debe seguir:</p>
                         <ul>
-                            <li><strong>NOM-251-SSA1-2009:</strong> Prácticas de higiene para el proceso de alimentos,
-                                bebidas o suplementos alimenticios.</li>
-                            <li><strong>NOM-093-SSA1-1994:</strong> Prácticas de higiene y sanidad en la preparación de
-                                alimentos que se ofrecen en establecimientos fijos.</li>
+                            <li><strong>NOM-251-SSA1-2009:</strong> Prácticas de higiene para el proceso de alimentos, bebidas o suplementos alimenticios.</li>
+                            <li><strong>NOM-093-SSA1-1994:</strong> Prácticas de higiene y sanidad en la preparación de alimentos que se ofrecen en establecimientos fijos.</li>
                         </ul>
                     </div>
                     <div class="card">
                         <h3>Control y Riesgo de Plagas</h3>
-                        <p><strong>Riesgos principales:</strong> Contaminación cruzada, cierre temporal por autoridades
-                            sanitarias, pérdida de reputación.</p>
+                        <p><strong>Riesgos principales:</strong> Contaminación cruzada, cierre temporal por autoridades sanitarias, pérdida de reputación.</p>
                         <br>
                         <h3>Cuidados Diarios:</h3>
                         <ul>
@@ -94,10 +185,9 @@
                     </div>
                 </div>
             </section>
-
+        </div>
     </main>
 
-    <script src="../static/main.js"></script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
-
 </html>
