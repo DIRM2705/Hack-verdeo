@@ -105,5 +105,84 @@ def reseñas(uuid_empresa : str):
             "reseñas": [{"calificacion": r[0], "comentario": r[1]} for r in res]
         }])
 
+def clasificar_empresa(uuid_empresa: UUID) -> str:
+    """
+    Clasifica una empresa como 'mala', 'regular' o 'excelente' basándose en:
+    - La cantidad de certificaciones vigentes
+    - El tiempo que han estado activas las certificaciones
+    - La proporción de certificaciones vencidas
+    
+    Args:
+        uuid_empresa: UUID de la empresa a clasificar
+        
+    Returns:
+        str: 'mala', 'regular' o 'excelente'
+    """
+    with Session(db) as session:
+        # Obtener todas las certificaciones de la empresa
+        stm = select(Certificacion.fecha_expedicion, Certificacion.fecha_vencimiento).where(
+            Certificacion.empresa_uuid == uuid_empresa
+        )
+        certificaciones = session.execute(stm).all()
+        
+        if not certificaciones:
+            return "mala"
+        
+        ahora = datetime.now()
+        vigentes = 0
+        vencidas = 0
+        tiempo_total_vigencia = 0
+        
+        for fecha_exp, fecha_venc in certificaciones:
+            # Calcular si está vigente
+            if fecha_venc > ahora:
+                vigentes += 1
+            else:
+                vencidas += 1
+            
+            # Calcular tiempo de vigencia en días
+            if fecha_venc > ahora:
+                # Si está vigente, calcular desde expedición hasta ahora
+                tiempo_vigencia = (ahora - fecha_exp).days
+            else:
+                # Si está vencida, calcular desde expedición hasta vencimiento
+                tiempo_vigencia = (fecha_venc - fecha_exp).days
+            
+            tiempo_total_vigencia += tiempo_vigencia
+        
+        total_certs = len(certificaciones)
+        tiempo_promedio = tiempo_total_vigencia // total_certs if total_certs > 0 else 0
+        porcentaje_vigentes = (vigentes / total_certs) * 100
+        
+        # Lógica de clasificación
+        if vigentes == 0:
+            return "mala"
+        elif vigentes == 1 and total_certs > 1:
+            return "mala"
+        elif vigentes <= 2 or (porcentaje_vigentes < 50 and total_certs > 2):
+            return "regular"
+        elif vigentes >= 4 and porcentaje_vigentes >= 80 and tiempo_promedio >= 365:
+            return "excelente"
+        elif vigentes >= 3 and porcentaje_vigentes >= 60 and tiempo_promedio >= 180:
+            return "regular"
+        else:
+            return "regular"
+
+
+@app.route('/api/clasificacion/<uuid_empresa>')
+def get_clasificacion(uuid_empresa: str):
+    """
+    Endpoint que retorna la clasificación de una empresa
+    """
+    try:
+        uuid_empresa_obj = UUID(uuid_empresa)
+        clasificacion = clasificar_empresa(uuid_empresa_obj)
+        return jsonify({"clasificacion": clasificacion})
+    except ValueError:
+        return jsonify({"error": "UUID inválido"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
