@@ -39,6 +39,25 @@ def certificaciones(uuid_empresa):
         return jsonify([{
             "count": certs
         }])
+        
+@app.route('/api/empleados/<uuid_empresa>')
+def empleados(uuid_empresa):
+    with Session(db) as session:
+        stm = select(Empleado.uuid, Empleado.nombre, Empleado.apellidos, Badge.icono_url).join(Badge, Empleado.badge_uuid == Badge.uuid).where(Empleado.uuid_empresa == uuid_empresa)
+        emp = session.execute(stm).scalars().all()
+        return jsonify([{
+            "count": len(emp),
+            "empleados": [{"uuid": e.uuid, "nombre": e.nombre, "apellidos": e.apellidos, "icono_url": e.icono_url} for e in emp]
+        }])
+        
+@app.route('/api/reseñas/<uuid_empresa>')
+def reseñas(uuid_empresa):
+    with Session(db) as session:
+        stm = select(func.count(Reseña.uuid)).select_from(Reseña).where(Reseña.uuid_empresa == uuid_empresa)
+        res = session.execute(stm).scalar()
+        return jsonify([{
+            "count": res
+        }])
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
