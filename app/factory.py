@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
+from models.badges import Badge
 from models.empleado import Empleado
 from models.usuarios import Usuario
 from models.reseñas import Reseña
@@ -24,7 +25,8 @@ CERTIFICACIONES = [
     {
         "nombre": "Distintivo H",
         "empresa": "CARPE DIEM",
-        "fecha_vencimiento": "2025-12-31",
+        "fecha_vencimiento": "2026-12-31",
+        "fecha_expedicion": "2025-01-01",
         "url_certificado": "https://www.gob.mx/cms/uploads/attachment/file/123456/distintivo_h.pdf"
     }
 ]
@@ -56,6 +58,15 @@ EMPLEADOS = [
     }
 ]
 
+INSIGNIAS = [
+    {
+        "empresa": "CARPE DIEM",
+        "empleado": "María Gómez",
+        "nombre": "Desinfección de Alimentos",
+        "icono_url": "https://www.gob.mx/cms/uploads/attachment/file/123456/desinfeccion_alimentos.png"
+    }
+]
+
 def seed_empleados(session: Session):
     empleados = []
     for empleado in EMPLEADOS:
@@ -68,6 +79,17 @@ def seed_empleados(session: Session):
         )
         empleados.append(empleado)
     session.add_all(empleados)
+    
+def seed_insignias(session: Session):
+    for insignia in INSIGNIAS:
+        stmt2 = select(Empleado).where(Empleado.nombres + " " + Empleado.apellidos == insignia["empleado"]).limit(1)
+        empleado = session.execute(stmt2).scalar_one()
+        badge = Badge(
+            empleados_uuid=empleado.uuid,
+            nombre=insignia["nombre"],
+            icono_url=insignia["icono_url"]
+        )
+        session.add(badge)
 
 def seed_empresas(session: Session):
     empresas = []
@@ -88,9 +110,10 @@ def seed_empresas(session: Session):
     
 def clear_data(session: Session):
     session.query(Certificacion).delete()
+    session.query(Badge).delete()
     session.query(Empleado).delete()
-    session.query(Empresa).delete()
     session.query(Reseña).delete()
+    session.query(Empresa).delete()
     session.query(Usuario).delete()
 
 def seed_certificaciones(session: Session):
@@ -148,6 +171,7 @@ def seed():
         seed_certificaciones(session)
         seed_reseñas(session)
         seed_empleados(session)
+        seed_insignias(session)
         
         #Guardar cambios en la base de datos
         session.commit()

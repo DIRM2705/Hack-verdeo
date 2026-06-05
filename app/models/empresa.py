@@ -17,4 +17,18 @@ class Empresa(Base):
     latitud: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     longitud: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     
+    def to_dict(self):
+        return {
+            "uuid": str(self.uuid),
+            "nombre": self.nombre,
+            "calle": self.calle,
+            "numero": self.numero,
+            "numero_interior": self.numero_interior,
+            "colonia": self.colonia,
+            "ciudad": self.ciudad,
+            "estado": self.estado,
+            "latitud": self.latitud,
+            "longitud": self.longitud
+        }
+    
     

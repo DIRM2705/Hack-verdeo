@@ -316,16 +316,6 @@
             border-bottom: none;
         }
 
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.45rem 0.8rem;
-            border-radius: 9999px;
-            border: 1px solid transparent;
-            font-size: 0.82rem;
-            font-weight: 600;
-        }
-
         .modal-backdrop {
             position: fixed;
             inset: 0;
@@ -460,6 +450,36 @@
             font-weight: 600;
         }
 
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid #e2e8f0;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .badges-cell {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .badge-loading {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
         @media (max-width: 900px) {
             body {
                 flex-direction: column;
@@ -522,8 +542,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <div>
                     <h1 style="font-size: 1.875rem; font-weight: 700; color: #0f172a;">Empleados</h1>
-                    <p style="color: #64748b; margin-top: 0.25rem;">Registra empleados y gestiona sus badges y
-                        certificaciones.</p>
+                    <p style="color: #64748b; margin-top: 0.25rem;">Registra empleados y gestiona sus insignias.</p>
                 </div>
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <span class="admin-badge"><i class="fa-solid fa-user"></i> Admin</span>
@@ -550,8 +569,7 @@
                 <thead>
                     <tr>
                         <th>Empleado</th>
-                        <th>Departamento</th>
-                        <th>Estatus</th>
+                        <th>Insignias</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -577,7 +595,7 @@
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <input type="hidden" id="edit-index">
+                <input type="hidden" id="edit-uuid">
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                     <div>
@@ -604,40 +622,14 @@
                         style="width: 100%; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;">
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                    <div>
-                        <label
-                            style="display: block; font-size: 0.75rem; font-weight: 600; color: #475569; margin-bottom: 0.25rem;">Departamento</label>
-                        <select id="f-dept"
-                            style="width: 100%; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;">
-                            <option value="">— Seleccionar —</option>
-                            <option>Ingeniería</option>
-                            <option>Diseño</option>
-                            <option>Ventas</option>
-                            <option>Recursos Humanos</option>
-                            <option>Operaciones</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label
-                            style="display: block; font-size: 0.75rem; font-weight: 600; color: #475569; margin-bottom: 0.25rem;">Estatus</label>
-                        <select id="f-estatus"
-                            style="width: 100%; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;">
-                            <option value="Activo">Activo</option>
-                            <option value="Inactivo">Inactivo</option>
-                            <option value="Licencia">Licencia</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Badges -->
+                <!-- Insignias en el modal -->
                 <div>
                     <label
-                        style="display: block; font-size: 0.75rem; font-weight: 600; color: #475569; margin-bottom: 0.5rem;">Badges</label>
+                        style="display: block; font-size: 0.75rem; font-weight: 600; color: #475569; margin-bottom: 0.5rem;">Insignias</label>
                     <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
                         <select id="f-badge-select"
                             style="flex: 1; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem;">
-                            <option value="">— Agregar badge —</option>
+                            <option value="">— Agregar insignia —</option>
                         </select>
                         <button onclick="addBadgeFromSelect()"
                             style="padding: 0.5rem 0.75rem; border-radius: 0.5rem; background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
@@ -654,7 +646,7 @@
                     style="padding: 0.5rem 1rem; border-radius: 0.5rem; background: transparent; border: none; cursor: pointer; color: #475569; font-size: 0.875rem; font-weight: 500;">
                     Cancelar
                 </button>
-                <button onclick="saveEmployee()"
+                <button id="save-btn" onclick="saveEmployee()"
                     style="padding: 0.5rem 1.25rem; border-radius: 0.5rem; background: #2563eb; border: none; cursor: pointer; color: white; font-size: 0.875rem; font-weight: 600;">
                     <i class="fa-solid fa-floppy-disk"></i> Guardar
                 </button>
@@ -671,8 +663,9 @@
     <script>
         // Datos del servidor (Flask)
         const empresaUUID = '{{ empresa_uuid }}';
+        const API_BASE = `/api/empleados/${empresaUUID}`;
 
-        // Configuración de badges disponibles
+        // Catálogo de insignias disponibles (para el selector del modal)
         const BADGES_CATALOG = [
             { id: 'lider', label: 'Líder', color: 'bg-violet-50 text-violet-700 border-violet-200', icon: 'fa-star' },
             { id: 'mentor', label: 'Mentor', color: 'bg-amber-50 text-amber-700 border-amber-200', icon: 'fa-graduation-cap' },
@@ -686,12 +679,6 @@
             { id: 'innovador', label: 'Innovador', color: 'bg-indigo-50 text-indigo-700 border-indigo-200', icon: 'fa-lightbulb' }
         ];
 
-        const STATUS_STYLES = {
-            'Activo': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-            'Inactivo': 'bg-slate-100 text-slate-500 border-slate-200',
-            'Licencia': 'bg-amber-50 text-amber-700 border-amber-200'
-        };
-
         const AVATAR_COLORS = [
             'bg-blue-100 text-blue-700', 'bg-violet-100 text-violet-700',
             'bg-emerald-100 text-emerald-700', 'bg-amber-100 text-amber-700',
@@ -700,6 +687,8 @@
 
         let employees = [];
         let modalBadges = [];
+        // Cache de insignias por empleado: { empleadoUUID: [badgeObjects] }
+        let badgesCache = new Map();
 
         // Helper functions
         function getBadge(id) {
@@ -723,15 +712,75 @@
             }, 2800);
         }
 
-        // Render table
-        function renderTable() {
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function (m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        // Cargar insignias de un empleado desde la API
+        async function loadBadgesForEmployee(empleadoUUID) {
+            if (badgesCache.has(empleadoUUID)) {
+                return badgesCache.get(empleadoUUID);
+            }
+            
+            try {
+                const response = await fetch(`/api/badges/${empleadoUUID}`);
+                if (!response.ok) {
+                    console.warn(`Error loading badges for ${empleadoUUID}: ${response.status}`);
+                    return [];
+                }
+                const data = await response.json();
+                // Se espera que la API devuelva un array de insignias
+                const badges = Array.isArray(data) ? data : (data.insignias || []);
+                badgesCache.set(empleadoUUID, badges);
+                return badges;
+            } catch (error) {
+                console.error(`Error loading badges for ${empleadoUUID}:`, error);
+                return [];
+            }
+        }
+
+        // Renderizar insignias en la celda de la tabla
+        async function renderBadgesCell(empleadoUUID, cellElement) {
+            // Mostrar loading
+            cellElement.innerHTML = '<span class="badge-loading"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</span>';
+            
+            const badges = await loadBadgesForEmployee(empleadoUUID);
+            
+            if (!badges || badges.length === 0) {
+                cellElement.innerHTML = '<span style="font-size: 0.75rem; color: #94a3b8;">Sin insignias</span>';
+                return;
+            }
+            
+            const badgesHtml = badges.map(badge => {
+                // Si la insignia tiene su propio estilo, lo usamos, sino usamos uno por defecto
+                const badgeClass = badge.color || 'bg-slate-100 text-slate-500 border-slate-200';
+                const badgeIcon = badge.icon || 'fa-tag';
+                const badgeLabel = badge.nombre || badge.label || badge.id || 'Insignia';
+                return `
+                    <span class="badge-pill ${badgeClass}">
+                        <i class="fa-solid ${badgeIcon}"></i>${escapeHtml(badgeLabel)}
+                    </span>
+                `;
+            }).join('');
+            
+            cellElement.innerHTML = `<div class="badges-cell">${badgesHtml}</div>`;
+        }
+
+        // Render table from employees array
+        async function renderTable() {
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
             const tbody = document.getElementById('employees-tbody');
             const emptyDiv = document.getElementById('empty-state');
             const countLabel = document.getElementById('count-label');
 
             const filtered = employees.filter(emp => {
-                const fullName = `${emp.nombre} ${emp.apellido} ${emp.correo}`.toLowerCase();
+                const fullName = `${emp.nombre} ${emp.apellido} ${emp.correo || ''}`.toLowerCase();
                 return fullName.includes(searchTerm);
             });
 
@@ -745,70 +794,143 @@
 
             emptyDiv.style.display = 'none';
 
-            filtered.forEach((emp, idx) => {
-                const initials = (emp.nombre[0] || '') + (emp.apellido[0] || '');
-                const avatarCls = avatarColor(emp.nombre);
-                const statusClass = STATUS_STYLES[emp.estatus] || STATUS_STYLES['Activo'];
+            for (let idx = 0; idx < filtered.length; idx++) {
+                const emp = filtered[idx];
+                const initials = (emp.nombre?.[0] || '') + (emp.apellido?.[0] || '');
+                const avatarCls = avatarColor(emp.nombre || '');
 
                 const tr = document.createElement('tr');
                 tr.className = 'employee-row';
                 tr.style.animation = 'fadeSlide 0.25s ease both';
                 tr.style.animationDelay = `${idx * 40}ms`;
 
-                tr.innerHTML = `
-                    <td style="padding: 0.875rem 1.25rem;">
-                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                            <div class="avatar ${avatarCls}">${initials}</div>
-                            <div>
-                                <p style="font-weight: 600; color: #0f172a;">${escapeHtml(emp.nombre)} ${escapeHtml(emp.apellido)}</p>
-                                <p style="font-size: 0.75rem; color: #64748b;">${escapeHtml(emp.correo)}</p>
-                            </div>
+                // Crear celdas
+                const tdEmployee = document.createElement('td');
+                tdEmployee.style.padding = '0.875rem 1.25rem';
+                tdEmployee.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div class="avatar ${avatarCls}">${initials || '?'}</div>
+                        <div>
+                            <p style="font-weight: 600; color: #0f172a;">${escapeHtml(emp.nombre || '')} ${escapeHtml(emp.apellido || '')}</p>
+                            <p style="font-size: 0.75rem; color: #64748b;">${escapeHtml(emp.correo || '')}</p>
                         </div>
-                    </td>
-                    <td style="padding: 0.875rem 1.25rem; color: #475569;">
-                        ${escapeHtml(emp.dept || '—')}
-                    </td>
-                    <td style="padding: 0.875rem 1.25rem;">
-                        <span class="badge-pill ${statusClass}">${emp.estatus || 'Activo'}</span>
-                    </td>
-                    <td style="padding: 0.875rem 1.25rem;">
-                        <div class="table-actions">
-                            <button onclick="openModal('edit', ${employees.indexOf(emp)})" class="action-btn edit" title="Editar">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-                            <button onclick="openBadgeManager(${employees.indexOf(emp)})" class="action-btn badge" title="Gestionar badges">
-                                <i class="fa-solid fa-tag"></i>
-                            </button>
-                            <button onclick="deleteEmployee(${employees.indexOf(emp)})" class="action-btn delete" title="Eliminar">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
+                    </div>
                 `;
+                
+                const tdBadges = document.createElement('td');
+                tdBadges.style.padding = '0.875rem 1.25rem';
+                
+                const tdActions = document.createElement('td');
+                tdActions.style.padding = '0.875rem 1.25rem';
+                tdActions.innerHTML = `
+                    <div class="table-actions">
+                        <button onclick="openModal('edit', '${emp.uuid}')" class="action-btn edit" title="Editar">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="openBadgeManager('${emp.uuid}')" class="action-btn badge" title="Gestionar insignias">
+                            <i class="fa-solid fa-tag"></i>
+                        </button>
+                        <button onclick="deleteEmployee('${emp.uuid}')" class="action-btn delete" title="Eliminar">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                tr.appendChild(tdEmployee);
+                tr.appendChild(tdBadges);
+                tr.appendChild(tdActions);
                 tbody.appendChild(tr);
-            });
+                
+                // Cargar insignias asíncronamente
+                renderBadgesCell(emp.uuid, tdBadges);
+            }
 
             countLabel.textContent = `${filtered.length} empleado${filtered.length !== 1 ? 's' : ''}`;
-        }
-
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, function (m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
         }
 
         function filterTable() {
             renderTable();
         }
 
+        // API Calls for employees
+        async function loadEmployees() {
+            try {
+                const response = await fetch(API_BASE);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    employees = data;
+                } else if (data.empleados && Array.isArray(data.empleados)) {
+                    employees = data.empleados;
+                } else {
+                    employees = [];
+                }
+                // Limpiar cache de insignias al recargar empleados
+                badgesCache.clear();
+                renderTable();
+            } catch (error) {
+                console.error('Error loading employees:', error);
+                showToast('Error al cargar empleados desde el servidor', false);
+                employees = [];
+                renderTable();
+            }
+        }
+
+        async function saveEmployeeToAPI(employeeData, isNew) {
+            const url = isNew ? API_BASE : `${API_BASE}/${employeeData.uuid}`;
+            const method = isNew ? 'POST' : 'PUT';
+            
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(employeeData)
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || `Error ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+
+        // API para guardar insignias de un empleado
+        async function saveBadgesToAPI(empleadoUUID, badges) {
+            const response = await fetch(`/api/badges/${empleadoUUID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ insignias: badges })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Error al guardar insignias: ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+
+        async function deleteEmployeeFromAPI(uuid) {
+            const response = await fetch(`${API_BASE}/${uuid}`, {
+                method: 'DELETE'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Error al eliminar: ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+
         // Badge management in modal
         function initBadgeSelect() {
             const sel = document.getElementById('f-badge-select');
-            sel.innerHTML = '<option value="">— Agregar badge —</option>';
+            sel.innerHTML = '<option value="">— Agregar insignia —</option>';
             BADGES_CATALOG.forEach(b => {
                 sel.innerHTML += `<option value="${b.id}">${b.label}</option>`;
             });
@@ -817,7 +939,7 @@
         function renderModalBadges() {
             const container = document.getElementById('f-badges-container');
             if (modalBadges.length === 0) {
-                container.innerHTML = '<span style="font-size: 0.75rem; color: #94a3b8;">Sin badges asignados</span>';
+                container.innerHTML = '<span style="font-size: 0.75rem; color: #94a3b8;">Sin insignias asignadas</span>';
                 return;
             }
             container.innerHTML = modalBadges.map(id => {
@@ -837,7 +959,7 @@
             const val = sel.value;
             if (!val) return;
             if (modalBadges.includes(val)) {
-                showToast('Badge ya agregado', false);
+                showToast('Insignia ya agregada', false);
                 sel.value = '';
                 return;
             }
@@ -851,51 +973,54 @@
             renderModalBadges();
         }
 
-        // Modal CRUD
-        function openModal(mode, idx = null) {
+        // Modal CRUD with API integration
+        async function openModal(mode, uuid = null) {
             const backdrop = document.getElementById('modal-backdrop');
             const title = document.getElementById('modal-title');
             modalBadges = [];
 
-            if (mode === 'edit' && idx !== null) {
-                const emp = employees[idx];
+            if (mode === 'edit' && uuid) {
+                const emp = employees.find(e => e.uuid === uuid);
+                if (!emp) {
+                    showToast('Empleado no encontrado', false);
+                    return;
+                }
                 title.textContent = 'Editar empleado';
-                document.getElementById('edit-index').value = idx;
-                document.getElementById('f-nombre').value = emp.nombre;
-                document.getElementById('f-apellido').value = emp.apellido;
-                document.getElementById('f-correo').value = emp.correo;
-                document.getElementById('f-dept').value = emp.dept || '';
-                document.getElementById('f-estatus').value = emp.estatus || 'Activo';
-                modalBadges = [...(emp.badges || [])];
+                document.getElementById('edit-uuid').value = emp.uuid;
+                document.getElementById('f-nombre').value = emp.nombre || '';
+                document.getElementById('f-apellido').value = emp.apellido || '';
+                document.getElementById('f-correo').value = emp.correo || '';
+                
+                // Cargar insignias actuales del empleado desde la API
+                const badges = await loadBadgesForEmployee(emp.uuid);
+                modalBadges = badges.map(b => b.id || b).filter(b => b);
             } else {
                 title.textContent = 'Nuevo empleado';
-                document.getElementById('edit-index').value = '';
+                document.getElementById('edit-uuid').value = '';
                 document.getElementById('f-nombre').value = '';
                 document.getElementById('f-apellido').value = '';
                 document.getElementById('f-correo').value = '';
-                document.getElementById('f-dept').value = '';
-                document.getElementById('f-estatus').value = 'Activo';
+                modalBadges = [];
             }
 
             renderModalBadges();
             backdrop.classList.add('open');
         }
 
-        function openBadgeManager(idx) {
-            openModal('edit', idx);
+        async function openBadgeManager(uuid) {
+            await openModal('edit', uuid);
         }
 
         function closeModal() {
             document.getElementById('modal-backdrop').classList.remove('open');
         }
 
-        function saveEmployee() {
+        async function saveEmployee() {
             const nombre = document.getElementById('f-nombre').value.trim();
             const apellido = document.getElementById('f-apellido').value.trim();
             const correo = document.getElementById('f-correo').value.trim();
-            const dept = document.getElementById('f-dept').value;
-            const estatus = document.getElementById('f-estatus').value;
-            const idx = document.getElementById('edit-index').value;
+            const uuid = document.getElementById('edit-uuid').value;
+            const isNew = !uuid;
 
             if (!nombre || !apellido || !correo) {
                 showToast('Nombre, apellido y correo son obligatorios.', false);
@@ -906,61 +1031,82 @@
                 return;
             }
 
-            const emp = { nombre, apellido, correo, dept, estatus, badges: [...modalBadges] };
-
-            if (idx !== '') {
-                employees[parseInt(idx)] = emp;
-                showToast('Empleado actualizado');
-            } else {
-                employees.unshift(emp);
-                showToast('Empleado registrado');
+            const employeeData = {
+                nombre,
+                apellido,
+                correo
+            };
+            
+            if (!isNew) {
+                employeeData.uuid = uuid;
             }
 
-            closeModal();
-            renderTable();
-        }
+            const saveBtn = document.getElementById('save-btn');
+            const originalHtml = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<span class="loading-spinner"></span> Guardando...';
+            saveBtn.disabled = true;
 
-        function deleteEmployee(idx) {
-            if (!confirm(`¿Eliminar a ${employees[idx].nombre} ${employees[idx].apellido}?`)) return;
-            employees.splice(idx, 1);
-            renderTable();
-            showToast('Empleado eliminado', false);
-        }
-
-        // Load data from server
-        async function loadEmployees() {
             try {
-                const response = await fetch(`/api/empleados/${empresaUUID}`);
-                const data = await response.json();
-                if (data && data.length > 0 && data[0].empleados) {
-                    employees = data[0].empleados.map(emp => ({
-                        uuid: emp.uuid,
-                        nombre: emp.nombre,
-                        apellido: emp.apellidos || '',
-                        correo: '',
-                        dept: '',
-                        estatus: 'Activo',
-                        badges: [],
-                        icono_url: emp.icono_url
-                    }));
+                let savedEmployee;
+                if (isNew) {
+                    const result = await saveEmployeeToAPI(employeeData, true);
+                    if (result.empleado) {
+                        savedEmployee = result.empleado;
+                    } else if (result.uuid) {
+                        savedEmployee = { ...employeeData, uuid: result.uuid };
+                    } else {
+                        savedEmployee = { ...employeeData, uuid: Date.now().toString() };
+                    }
+                    employees.unshift(savedEmployee);
                 } else {
-                    // Datos de ejemplo si no hay en la BD
-                    employees = [
-                        { nombre: 'Ana', apellido: 'García', correo: 'ana.garcia@empresa.com', dept: 'Ingeniería', estatus: 'Activo', badges: ['lider', 'fullstack'] },
-                        { nombre: 'Carlos', apellido: 'López', correo: 'carlos.lopez@empresa.com', dept: 'Diseño', estatus: 'Activo', badges: ['diseño', 'innovador'] },
-                        { nombre: 'María', apellido: 'Martínez', correo: 'maria.martinez@empresa.com', dept: 'Ventas', estatus: 'Activo', badges: ['ventas'] }
-                    ];
+                    await saveEmployeeToAPI(employeeData, false);
+                    const index = employees.findIndex(e => e.uuid === uuid);
+                    if (index !== -1) {
+                        employees[index] = { ...employeeData, uuid };
+                        savedEmployee = employees[index];
+                    }
                 }
+                
+                // Guardar insignias del empleado
+                if (savedEmployee && modalBadges.length > 0) {
+                    await saveBadgesToAPI(savedEmployee.uuid, modalBadges);
+                } else if (savedEmployee && modalBadges.length === 0) {
+                    // Si no hay insignias, guardar array vacío
+                    await saveBadgesToAPI(savedEmployee.uuid, []);
+                }
+                
+                // Limpiar cache de insignias
+                if (savedEmployee) {
+                    badgesCache.delete(savedEmployee.uuid);
+                }
+                
+                showToast(isNew ? 'Empleado registrado correctamente' : 'Empleado actualizado correctamente');
+                closeModal();
                 renderTable();
             } catch (error) {
-                console.error('Error loading employees:', error);
-                // Datos de ejemplo
-                employees = [
-                    { nombre: 'Ana', apellido: 'García', correo: 'ana.garcia@empresa.com', dept: 'Ingeniería', estatus: 'Activo', badges: ['lider', 'fullstack'] },
-                    { nombre: 'Carlos', apellido: 'López', correo: 'carlos.lopez@empresa.com', dept: 'Diseño', estatus: 'Activo', badges: ['diseño', 'innovador'] },
-                    { nombre: 'María', apellido: 'Martínez', correo: 'maria.martinez@empresa.com', dept: 'Ventas', estatus: 'Activo', badges: ['ventas'] }
-                ];
+                console.error('Error saving employee:', error);
+                showToast(`Error al guardar: ${error.message}`, false);
+            } finally {
+                saveBtn.innerHTML = originalHtml;
+                saveBtn.disabled = false;
+            }
+        }
+
+        async function deleteEmployee(uuid) {
+            const employee = employees.find(e => e.uuid === uuid);
+            if (!employee) return;
+            
+            if (!confirm(`¿Eliminar a ${employee.nombre} ${employee.apellido}?`)) return;
+            
+            try {
+                await deleteEmployeeFromAPI(uuid);
+                employees = employees.filter(e => e.uuid !== uuid);
+                badgesCache.delete(uuid);
                 renderTable();
+                showToast('Empleado eliminado correctamente');
+            } catch (error) {
+                console.error('Error deleting employee:', error);
+                showToast(`Error al eliminar: ${error.message}`, false);
             }
         }
 

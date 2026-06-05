@@ -10,6 +10,7 @@ class Certificacion(Base):
     uuid: Mapped[UUID] = mapped_column(Uuid(native_uuid=True), primary_key=True, default=uuid4)
     empresa_uuid: Mapped[UUID] = mapped_column(Uuid(native_uuid=True), ForeignKey("EMPRESAS.uuid"), nullable=False)
     nombre: Mapped[str] = mapped_column(String(255), nullable=False)
+    fecha_expedicion: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now)
     fecha_vencimiento: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     url_certificado: Mapped[str] = mapped_column(String(255), nullable=False)
     

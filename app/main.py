@@ -32,7 +32,7 @@ def home():
 @app.route('/empresa/<uuid_empresa>')
 def dashboard(uuid_empresa: str):
     # ejemplo de UUID de empresa — reemplazar por UUID real según sesión/usuario
-    ejemplo_uuid = 'a0c48199a44a4f22be0c43ade5ddd630'
+    ejemplo_uuid = '89331cafde494c969c094e7f3bc68f14'
     return render_template('empresa.html', empresa_uuid=ejemplo_uuid)
 
 @app.route('/api/negocios')
@@ -42,15 +42,17 @@ def negocios():
         stm = select(Empresa)
         negocios = session.execute(stm).scalars().all()
         for negocio in negocios:
+            negocio = negocio.to_dict()
+            print(negocio)
             empresas.append({
-                "nombre": negocio.nombre,
+                "nombre": negocio["nombre"],
                 "ubicacion": {
-                    "lat": negocio.latitud,
-                    "lng": negocio.longitud
+                    "lat": negocio["latitud"],
+                    "lng": negocio["longitud"]
                 },
-                "calidad": "bueno"  # Aquí podrías calcular la calidad real basada en reseñas o certificaciones
+                "calidad": clasificar_empresa(UUID(negocio["uuid"]))
             })
-    return jsonify(negocios)
+    return jsonify(empresas)
 
 
 @app.route('/normativas/<uuid_empresa>')
@@ -76,6 +78,14 @@ def empleados_page(uuid_empresa : str):
                 'badges': []
             })
     return render_template('empleados.html', empresa_uuid=uuid_empresa, empleados=empleados_list)
+
+@app.route('/api/badges/<uuid_empleado>')
+def badges(uuid_empleado: str):
+    with Session(db) as session:
+        uuid_empleado = UUID(uuid_empleado)
+        stm = select(Badge.icono_url).where(Badge.empleados_uuid == uuid_empleado)
+        badges = session.execute(stm).scalars().all()
+        return jsonify([{"icono_url": b} for b in badges])
 
 @app.route('/api/empresa/<uuid_empresa>')
 def empresa(uuid_empresa : str):
@@ -179,7 +189,7 @@ def clasificar_empresa(uuid_empresa: UUID) -> str:
         elif vigentes <= 2 or (porcentaje_vigentes < 50 and total_certs > 2):
             return "regular"
         elif vigentes >= 4 and porcentaje_vigentes >= 80 and tiempo_promedio >= 365:
-            return "excelente"
+            return "bueno"
         elif vigentes >= 3 and porcentaje_vigentes >= 60 and tiempo_promedio >= 180:
             return "regular"
         else:
